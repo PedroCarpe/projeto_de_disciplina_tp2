@@ -1,0 +1,36 @@
+# --- Python / Django ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+db.sqlite3
+media/
+*.log
+
+# --- Testes e Cobertura (Python) .pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# --- Node / React / Frontend ---
+node_modules/
+dist/
+build/
+.pnp
+.pnp.js
+.eslintcache
+
+# --- IDEs e Editores ---
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db

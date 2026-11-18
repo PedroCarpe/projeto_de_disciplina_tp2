@@ -1,0 +1,27 @@
+[tool.ruff]
+target-version = "py310"  # 👈 Garante compatibilidade para quem usa da versão 3.10 em diante
+line-length = 88
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort (organização de imports)
+    "B",   # flake8-bugbear (detecção de bugs comuns)
+    "DJ",  # flake8-django (boas práticas específicas do Django)
+]
+ignore = []
+
+[tool.mypy]
+python_version = "3.10"  # 👈 Mypy valida assumindo o Python 3.10 como base
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+plugins = ["mypy_django_plugin.main"]
+
+[tool.django-stubs]
+django_settings_module = "config.settings"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings"
+python_files = ["test_*.py", "*_test.py"]
+addopts = "--cov=. --cov-report=term-missing --cov-fail-under=80"

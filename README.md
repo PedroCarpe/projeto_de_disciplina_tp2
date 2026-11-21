@@ -165,3 +165,31 @@ O projeto utiliza ferramentas estritas para garantir rigor acadêmico e estabili
 Os testes de unidade do Back ficam em `backend/tests/` ou em módulos `test_*.py` dentro da pasta `tests/` de cada app, sem depender de ciclo HTTP completo, template ou banco quando isso não for necessário. Os testes de integração Django exercitam a ligação entre URL, view, formulário, banco e resposta; ficam em módulos `test_*_integracao.py` nessa pasta (por exemplo, `backend/usuarios/tests/test_cadastro_integracao.py`). O time de Front pode assumir a manutenção dos testes de integração voltados às telas, incluindo status, templates, contexto e HTML renderizado. Regras de negócio e comportamento isolado dos componentes Python continuam cobertos pelos testes de unidade do Back.
 
 A meta de cobertura deve ser definida para o conjunto que o grupo acordar; cobertura agregada não substitui a separação de responsabilidades entre os tipos de teste.
+
+## 📝 Padrões de commits
+
+As mensagens de commit seguem o formato:
+
+```text
+<tipo>: <descrição curta no presente>
+```
+
+Usamos estes tipos para indicar a intenção da mudança:
+
+* `feat`: adiciona uma funcionalidade.
+* `fix`: corrige um comportamento incorreto.
+* `test`: adiciona ou altera testes, sem implementar a funcionalidade correspondente.
+* `refactor`: reorganiza o código sem mudar o comportamento.
+* `docs`: atualiza documentação.
+* `chore`: faz manutenção ou atualiza configurações e ferramentas.
+
+Exemplos do histórico deste projeto:
+
+```text
+test: define fluxo de cadastro por template
+feat: implementa cadastro integrado ao template
+refactor: simplifica fluxo da view de cadastro
+chore: atualiza arquivos
+```
+
+Quando o trabalho usar TDD, registramos as etapas em commits separados: primeiro o teste que falha (`test`), depois a implementação que o faz passar (`feat` ou `fix`) e, por fim, a refatoração (`refactor`).

@@ -102,20 +102,63 @@ Found 15 test(s).
 System check identified no issues (0 silenced).
 ```
 
+## Login — ciclo aplicado a um comportamento ausente
+
+A tela de login já existia antes desta rodada. Para não apresentá-la como se tivesse nascido de
+TDD, o ciclo abaixo foi aplicado apenas a um comportamento que **ainda faltava**: marcar a opção
+ativa do alternador com `aria-current="page"`, como já fazia o cadastro.
+
+### RED
+
+Teste escrito primeiro em `frontend/test_views.py`:
+
+- `LoginViewTests.test_login_marca_opcao_ativa_do_alternador`
+
+Saída real:
+
+```text
+Creating test database for alias 'default'...
+.........F......
+FAIL: test_login_marca_opcao_ativa_do_alternador
+AssertionError: False is not true : Couldn't find 'aria-selected="true" aria-current="page"' in the following response
+----------------------------------------------------------------------
+Ran 16 tests in 1.634s
+
+FAILED (failures=1)
+```
+
+### GREEN
+
+Adicionado `aria-current="page"` ao link ativo “Entrar” em `usuarios/templates/usuarios/login.html`,
+sem alterar `usuarios/views.py` nem a lógica de autenticação.
+
+### REFACTOR e testes de caracterização
+
+Como a interface já estava pronta, os demais testes de login são de **caracterização/regressão** —
+foram escritos depois da implementação e **não** são apresentados como TDD:
+
+- `test_login_toggle_de_senha_e_acessivel` — `aria-controls`, `aria-label`, `aria-pressed` e ícones;
+- `test_login_campos_usam_autocomplete_correto` — `email` e `current-password`;
+- `test_login_nao_autentica_apenas_renderiza` — POST não cria sessão autenticada;
+- `test_login_alternador_aponta_para_cadastro` — movido de `CadastroViewTests` para
+  `LoginViewTests`, apenas para organizar a suíte.
+
+Todos passaram já na primeira execução após o GREEN.
+
 ## Verificação final
 
 ```text
 python manage.py check  → System check identified no issues (0 silenced).
 ruff check .            → All checks passed!
-pytest                  → 15 passed in 2.57s
-TOTAL                   → 209 statements, 2 miss, 99% (99.04%)
+pytest                  → 19 passed in 2.16s
+TOTAL                   → 234 statements, 2 miss, 99% (99.15%)
 ```
 
 A cobertura ficou acima da meta de 80% definida em `docs/FRONTEND.md`.
 
 ## Observação sobre o histórico no GitHub
 
-Esta evidência está sendo commitada **em um único commit**, junto com o código final. Isso é
-intencional: o ciclo real aconteceu nesta sessão, mas não foi possível gerar três commits
-cronológicos distintos sem reconstruir artificialmente o histórico. Os trechos acima são as
-saídas reais dos comandos executados durante o desenvolvimento.
+Cada ciclo foi registrado em um commit único, junto com o código final. Isso é intencional: os
+ciclos reais aconteceram nesta sessão, mas não foi possível gerar três commits cronológicos
+distintos sem reconstruir artificialmente o histórico. Os trechos acima são as saídas reais dos
+comandos executados durante o desenvolvimento.

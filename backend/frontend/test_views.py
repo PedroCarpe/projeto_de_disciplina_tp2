@@ -65,6 +65,47 @@ class LoginViewTests(TestCase):
         self.assertContains(response, "acesso__titulo")
         self.assertContains(response, "botao--primario")
 
+    def test_login_marca_opcao_ativa_do_alternador(self) -> None:
+        resposta = self.client.get(reverse("login"))
+        conteudo = resposta.content.decode()
+
+        self.assertContains(resposta, 'aria-selected="true" aria-current="page"')
+        self.assertEqual(conteudo.count('aria-current="page"'), 1)
+        self.assertContains(resposta, 'aria-selected="false">Criar conta')
+
+    def test_login_toggle_de_senha_e_acessivel(self) -> None:
+        resposta = self.client.get(reverse("login"))
+
+        self.assertContains(resposta, 'type="button"')
+        self.assertContains(resposta, 'aria-controls="id_senha"')
+        self.assertContains(resposta, 'aria-label="Mostrar senha"')
+        self.assertContains(resposta, 'aria-pressed="false"')
+        self.assertContains(resposta, 'data-icon="eye"')
+        self.assertContains(resposta, 'data-icon="eye-off"')
+
+    def test_login_campos_usam_autocomplete_correto(self) -> None:
+        resposta = self.client.get(reverse("login"))
+
+        self.assertContains(resposta, 'type="email"')
+        self.assertContains(resposta, 'autocomplete="email"')
+        self.assertContains(resposta, 'type="password"')
+        self.assertContains(resposta, 'autocomplete="current-password"')
+
+    def test_login_nao_autentica_apenas_renderiza(self) -> None:
+        resposta = self.client.post(
+            reverse("login"),
+            {"email": "maria@exemplo.com", "senha": "senhaSegura123"},
+        )
+
+        self.assertEqual(resposta.status_code, 200)
+        self.assertTemplateUsed(resposta, "usuarios/login.html")
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+    def test_login_alternador_aponta_para_cadastro(self) -> None:
+        resposta = self.client.get(reverse("login"))
+
+        self.assertContains(resposta, f'href="{reverse("cadastro")}"')
+
 
 class CadastroViewTests(TestCase):
     def test_cadastro_route_and_templates(self) -> None:
@@ -196,8 +237,3 @@ class CadastroViewTests(TestCase):
         self.assertEqual(resposta.status_code, 200)
         self.assertContains(resposta, "Este e-mail já está cadastrado.")
         self.assertEqual(User.objects.count(), 1)
-
-    def test_login_links_to_cadastro(self) -> None:
-        response = self.client.get(reverse("login"))
-
-        self.assertContains(response, f'href="{reverse("cadastro")}"')

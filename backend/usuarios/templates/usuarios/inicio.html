@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Início — Nossa Rua{% endblock %}
+
+{% block content %}
+<main class="inicio">
+  <header class="inicio__cabecalho">
+    {% include "includes/logo.html" %}
+
+    <nav class="inicio__acoes" aria-label="Acesso à conta">
+      <a href="{% url 'login' %}" class="botao botao--secundario">Entrar</a>
+      <a href="{% url 'cadastro' %}" class="botao botao--primario">
+        <span>Criar conta</span>
+        <svg class="botao__seta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M5 12h13" />
+          <path d="m13 6 6 6-6 6" />
+        </svg>
+      </a>
+    </nav>
+  </header>
+
+  <section class="inicio__hero">
+    <p class="etiqueta">
+      <svg class="etiqueta__icone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M19 10c0 4.6-7 11-7 11S5 14.6 5 10a7 7 0 1 1 14 0Z" />
+        <circle cx="12" cy="10" r="2.2" />
+      </svg>
+      Nossa rua, cuidada por todos
+    </p>
+    <h1 class="inicio__titulo">Cuide do seu bairro. <span>Registre, acompanhe, melhore.</span></h1>
+    <p class="inicio__descricao">
+      Aponte o que precisa de atenção, acompanhe cada etapa e veja a sua rua mudar.
+      Simples para quem mora aqui e claro para quem cuida da cidade.
+    </p>
+    <a href="{% url 'cadastro' %}" class="ligacao inicio__link">Quero começar agora →</a>
+  </section>
+
+  <section class="inicio__recursos" aria-label="Como funciona">
+    <article class="recurso recurso--pessego">
+      <span class="recurso__numero">01</span>
+      <h2>Registre</h2>
+      <p>Descreva o problema e marque o lugar. Poucos passos, sem complicação.</p>
+    </article>
+    <article class="recurso recurso--ceu">
+      <span class="recurso__numero">02</span>
+      <h2>Acompanhe</h2>
+      <p>Veja o status de cada ocorrência, da análise até a solução.</p>
+    </article>
+    <article class="recurso recurso--menta">
+      <span class="recurso__numero">03</span>
+      <h2>Melhore</h2>
+      <p>Juntos, transformamos pequenos apontamentos em mudanças reais.</p>
+    </article>
+  </section>
+
+  <section class="inicio__estados" aria-label="Status das ocorrências">
+    <span class="estado estado--registrada">Registrada</span>
+    <span class="estado estado--analise">Em análise</span>
+    <span class="estado estado--andamento">Em andamento</span>
+    <span class="estado estado--resolvida">Resolvida</span>
+  </section>
+</main>
+{% endblock %}

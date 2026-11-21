@@ -3,12 +3,28 @@ from django.test import TestCase
 from django.urls import reverse
 
 
+class HomeViewTests(TestCase):
+    def test_root_renderiza_pagina_inicial(self) -> None:
+        resposta = self.client.get("/")
+
+        self.assertEqual(resposta.status_code, 200)
+        self.assertTemplateUsed(resposta, "base.html")
+        self.assertTemplateUsed(resposta, "includes/logo.html")
+        self.assertTemplateUsed(resposta, "usuarios/inicio.html")
+
+    def test_pagina_inicial_tem_chamada_e_acoes(self) -> None:
+        resposta = self.client.get("/")
+
+        self.assertContains(resposta, "Cuide do seu bairro.")
+        self.assertContains(resposta, "Registre, acompanhe, melhore.")
+        self.assertContains(resposta, f'href="{reverse("login")}"')
+        self.assertContains(resposta, f'href="{reverse("cadastro")}"')
+        self.assertContains(resposta, "Registre")
+        self.assertContains(resposta, "Acompanhe")
+        self.assertContains(resposta, "Melhore")
+
+
 class LoginViewTests(TestCase):
-    def test_root_redirects_to_login(self) -> None:
-        response = self.client.get("/")
-
-        self.assertRedirects(response, reverse("login"))
-
     def test_login_page_uses_expected_templates(self) -> None:
         response = self.client.get(reverse("login"))
 
@@ -24,6 +40,7 @@ class LoginViewTests(TestCase):
         self.assertContains(response, "Nossa rua, cuidada por todos.")
         self.assertContains(response, "Registre, acompanhe e faça parte.")
         self.assertContains(response, "Explorar como visitante")
+        self.assertContains(response, f'href="{reverse("inicio")}"')
         self.assertContains(response, "Acesso ao sistema")
         self.assertContains(response, "Bom ter você de volta.")
         self.assertContains(response, "Entre para acompanhar o que importa para você.")

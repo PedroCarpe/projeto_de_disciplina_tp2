@@ -8,30 +8,42 @@ Sistema web monolítico para gerenciamento e rastreamento de ocorrências com su
 * **Banco de Dados:** PostgreSQL com extensão espacial **PostGIS** (GeoDjango nativo)
 * **Frontend:** Server-Side Rendering (SSR) com Django Templates, Tailwind CSS (via CDN) e Leaflet.js (para mapas interativos)
 * **Qualidade de Código & Linters:** Ruff (formatação e linting estrito com regras Django) e Mypy (tipagem estática estrita com `django-stubs`)
-* **Testes Automatizados:** Pytest, `pytest-django` e `pytest-cov` (Meta de cobertura $\ge 80\%$)
+* **Testes Automatizados:** Pytest, `pytest-django` e `pytest-cov`; testes de unidade do Back e testes de integração da aplicação Django.
 
 ## 📂 Estrutura do Projeto
 
-O projeto adota uma arquitetura monolítica organizada sob o diretório `backend/`, refletindo a seguinte árvore de diretórios:
+O projeto adota uma arquitetura monolítica organizada sob o diretório `backend/`:
 
 ```text
 .
-├── backend
-│   ├── db.sqlite3
-│   ├── manage.py
-│   ├── pyproject.toml
-│   ├── requirements.txt
-│   └── setup
-│       ├── asgi.py
-│       ├── __init__.py
-│       ├── __pycache__
-│       │   ├── __init__.cpython-312.pyc
-│       │   ├── settings.cpython-312.pyc
-│       │   ├── urls.cpython-312.pyc
-│       │   └── wsgi.cpython-312.pyc
-│       ├── settings.py
-│       ├── urls.py
-│       └── wsgi.py
+├── README.md
+├── docs/
+│   └── FRONTEND.md
+└── backend/
+    ├── manage.py
+    ├── pyproject.toml
+    ├── requirements.txt
+    ├── setup/
+    │   ├── asgi.py
+    │   ├── settings.py
+    │   ├── urls.py
+    │   └── wsgi.py
+    ├── templates/
+    │   └── base.html
+    └── usuarios/
+        ├── migrations/
+        ├── templates/usuarios/
+        │   ├── cadastro.html
+        │   └── login.html
+        ├── tests/
+        │   ├── test_cadastro_integracao.py
+        │   └── test_cadastro_unidade.py
+        ├── admin.py
+        ├── apps.py
+        ├── forms.py
+        ├── models.py
+        ├── urls.py
+        └── views.py
 ```
 
 ## ⚙️ Pré-requisitos e Instalação
@@ -97,6 +109,42 @@ python manage.py runserver
 
 Acesse no navegador: `http://127.0.0.1:8000/`
 
+## 🗃️ Usando o SQLite no desenvolvimento
+
+Enquanto o banco padrão do projeto for o SQLite, o Django usa o arquivo `backend/db.sqlite3` (configurado em `backend/setup/settings.py`). Para abrir esse banco pelo terminal, primeiro entre na pasta `backend/`:
+
+```bash
+cd backend
+sqlite3 db.sqlite3
+```
+
+No prompt do SQLite (`sqlite>`), use os comandos próprios do `sqlite3`:
+
+```text
+.tables
+.schema auth_user
+.schema usuarios_usuario
+.quit
+```
+
+`.tables` lista as tabelas, `.schema auth_user` mostra a estrutura da tabela de usuários do Django e `.quit` fecha o SQLite. `.schema usuarios_usuario` só será útil se essa tabela existir: o cadastro atual usa o modelo padrão do Django, armazenado em `auth_user`.
+
+Para consultar os usuários, execute SQL no prompt `sqlite>` (cada consulta termina com ponto e vírgula):
+
+```sql
+SELECT id, username FROM auth_user;
+```
+
+Os comandos que começam com ponto são comandos do programa `sqlite3`, não instruções SQL. Para conferir qual arquivo SQLite o Django está usando, veja `DATABASES` em `setup/settings.py`.
+
+Também é possível abrir o banco configurado pelo Django, sem informar o caminho diretamente:
+
+```bash
+python manage.py dbshell
+```
+
+Esse comando requer que o executável `sqlite3` esteja instalado e disponível no `PATH`.
+
 ## 🧪 Qualidade de Código e Testes
 
 O projeto utiliza ferramentas estritas para garantir rigor acadêmico e estabilidade:
@@ -109,7 +157,11 @@ O projeto utiliza ferramentas estritas para garantir rigor acadêmico e estabili
   ```bash
   mypy .
   ```
-* **Execução de Testes com Cobertura ($\ge 80\%$):**
+* **Execução de testes (unidade e integração):**
   ```bash
   pytest
   ```
+
+Os testes de unidade do Back ficam em `backend/tests/` ou em módulos `test_*.py` dentro da pasta `tests/` de cada app, sem depender de ciclo HTTP completo, template ou banco quando isso não for necessário. Os testes de integração Django exercitam a ligação entre URL, view, formulário, banco e resposta; ficam em módulos `test_*_integracao.py` nessa pasta (por exemplo, `backend/usuarios/tests/test_cadastro_integracao.py`). O time de Front pode assumir a manutenção dos testes de integração voltados às telas, incluindo status, templates, contexto e HTML renderizado. Regras de negócio e comportamento isolado dos componentes Python continuam cobertos pelos testes de unidade do Back.
+
+A meta de cobertura deve ser definida para o conjunto que o grupo acordar; cobertura agregada não substitui a separação de responsabilidades entre os tipos de teste.

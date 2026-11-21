@@ -35,3 +35,6 @@ build/
 *.swo
 .DS_Store
 Thumbs.db
+
+# --- Documentacao ---
+docs/

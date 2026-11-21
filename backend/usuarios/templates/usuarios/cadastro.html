@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <main>
+    <h1>Cadastro de usuário</h1>
+
+    {% if sucesso %}
+      <p role="status">Cadastro realizado com sucesso</p>
+    {% endif %}
+
+    <form method="post" action="{% url 'usuarios:cadastro' %}">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit">Cadastrar</button>
+    </form>
+  </main>
+{% endblock %}

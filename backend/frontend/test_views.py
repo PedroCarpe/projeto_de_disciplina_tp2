@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
 
@@ -63,3 +64,140 @@ class LoginViewTests(TestCase):
         self.assertContains(response, "alternador__opcao--ativa")
         self.assertContains(response, "acesso__titulo")
         self.assertContains(response, "botao--primario")
+
+
+class CadastroViewTests(TestCase):
+    def test_cadastro_route_and_templates(self) -> None:
+        self.assertEqual(reverse("cadastro"), "/cadastro/")
+
+        response = self.client.get(reverse("cadastro"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "base.html")
+        self.assertTemplateUsed(response, "includes/logo.html")
+        self.assertTemplateUsed(response, "usuarios/cadastro.html")
+
+    def test_cadastro_has_essential_content(self) -> None:
+        response = self.client.get(reverse("cadastro"))
+
+        self.assertContains(response, "Nossa Rua")
+        self.assertContains(response, "Nossa rua, cuidada por todos.")
+        self.assertContains(response, "Registre, acompanhe e faça parte.")
+        self.assertContains(response, f'href="{reverse("login")}"')
+        self.assertContains(response, "Novo por aqui")
+        self.assertContains(response, "Crie sua conta.")
+        self.assertContains(response, "Nome completo")
+        self.assertContains(response, "Confirmação de senha")
+        self.assertNotContains(response, "Já tem uma conta?")
+
+    def test_cadastro_keeps_form_integrity(self) -> None:
+        response = self.client.get(reverse("cadastro"))
+        conteudo = response.content.decode()
+
+        self.assertContains(response, 'method="post"')
+        self.assertContains(response, "csrfmiddlewaretoken")
+        self.assertContains(response, 'name="nome"')
+        self.assertContains(response, 'name="email"')
+        self.assertContains(response, 'name="senha"')
+        self.assertContains(response, 'name="confirmacao_senha"')
+        self.assertContains(response, "data-senha-toggle")
+        self.assertEqual(conteudo.count('aria-controls="id_'), 2)
+        self.assertContains(response, 'aria-describedby="erro-nome"')
+        self.assertContains(response, 'aria-describedby="erro-confirmacao-senha"')
+        self.assertContains(response, "botao--primario")
+
+    def test_cadastro_shows_validation_errors(self) -> None:
+        response = self.client.post(
+            reverse("cadastro"),
+            {
+                "nome": "",
+                "email": "invalido",
+                "senha": "123",
+                "confirmacao_senha": "456",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Revise os campos destacados abaixo.")
+        self.assertContains(response, "Informe seu nome completo.")
+        self.assertContains(response, "Informe um e-mail válido.")
+        self.assertContains(response, "A senha deve ter pelo menos 8 caracteres.")
+        self.assertContains(response, "As senhas não coincidem.")
+        self.assertContains(response, 'aria-invalid="true"')
+        self.assertContains(response, "campo__grupo--invalido")
+        self.assertNotContains(response, "data-aviso-erro hidden")
+
+    def test_cadastro_reports_empty_required_fields(self) -> None:
+        response = self.client.post(reverse("cadastro"), {})
+
+        self.assertContains(response, "Informe seu e-mail.")
+        self.assertContains(response, "Crie uma senha.")
+        self.assertContains(response, "Confirme sua senha.")
+
+    def test_cadastro_limpa_formulario_apos_sucesso(self) -> None:
+        response = self.client.post(
+            reverse("cadastro"),
+            {
+                "nome": "Maria Silva",
+                "email": "maria@exemplo.com",
+                "senha": "senhaSegura123",
+                "confirmacao_senha": "senhaSegura123",
+            },
+        )
+
+        conteudo = response.content.decode()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "data-aviso-erro hidden")
+        self.assertNotContains(response, 'class="campo__grupo campo__grupo--invalido"')
+        self.assertEqual(conteudo.count('aria-invalid="true"'), 0)
+        self.assertContains(response, "Conta criada com sucesso.")
+        self.assertContains(response, 'value=""')
+
+    def test_cadastro_cria_usuario_com_dados_validos(self) -> None:
+        resposta = self.client.post(
+            reverse("cadastro"),
+            {
+                "nome": "Maria Silva",
+                "email": "maria@exemplo.com",
+                "senha": "senhaSegura123",
+                "confirmacao_senha": "senhaSegura123",
+            },
+        )
+
+        self.assertEqual(resposta.status_code, 200)
+        self.assertContains(resposta, "Conta criada com sucesso.")
+
+        usuario = User.objects.get(email="maria@exemplo.com")
+        self.assertEqual(usuario.username, "maria@exemplo.com")
+        self.assertEqual(usuario.get_full_name(), "Maria Silva")
+        self.assertTrue(usuario.check_password("senhaSegura123"))
+        self.assertNotEqual(usuario.password, "senhaSegura123")
+
+    def test_cadastro_rejeita_email_duplicado(self) -> None:
+        User.objects.create_user(
+            username="joao@exemplo.com",
+            email="joao@exemplo.com",
+            password="senhaAntiga123",
+            first_name="Joao",
+            last_name="Silva",
+        )
+
+        resposta = self.client.post(
+            reverse("cadastro"),
+            {
+                "nome": "Outro Joao",
+                "email": "JOAO@exemplo.com",
+                "senha": "senhaNova123",
+                "confirmacao_senha": "senhaNova123",
+            },
+        )
+
+        self.assertEqual(resposta.status_code, 200)
+        self.assertContains(resposta, "Este e-mail já está cadastrado.")
+        self.assertEqual(User.objects.count(), 1)
+
+    def test_login_links_to_cadastro(self) -> None:
+        response = self.client.get(reverse("login"))
+
+        self.assertContains(response, f'href="{reverse("cadastro")}"')

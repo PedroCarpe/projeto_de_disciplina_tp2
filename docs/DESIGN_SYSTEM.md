@@ -23,7 +23,7 @@ Linguagem visual alinhada à referência enviada, com o nome **Nossa Rua**.
 | `--manteiga` | `#FBF0C8` | Em análise |
 | `--branco` | `#FFFFFF` | Painéis e campos |
 
-Aliases mantidos: `--verde-creme`, `--branco-quente`, `--salvia`. Derivados: `--texto-secundario` (`#5E6B73`), `--verde-cinza`, `--borda` (`#EDE6DB`), `--linha`, `--placeholder`.
+Aliases mantidos: `--verde-creme`, `--branco-quente`, `--salvia`. Derivados: `--texto-secundario` (`#5E6B73`), `--verde-cinza`, `--borda` (`#EDE6DB`), `--linha`, `--placeholder`. Validação: `--erro` (`#9B3B2E`) e `--erro-suave` (`#FBE9E4`).
 
 Fonte: **Nunito** (400/600/700/800). Raios: campos `18px`, botões `16px`, cartões `22px`.
 
@@ -54,6 +54,7 @@ Composição: quadrado verde arredondado com pin branco, centro verde e ponto p�
 | Texto de acesso | `.etiqueta`, `.etiqueta__icone`, `.acesso__titulo`, `.acesso__subtitulo`, `.acesso__visitante` |
 | Alternador | `.alternador`, `.alternador__opcao`, `.alternador__opcao--ativa` |
 | Formulário | `.formulario`, `.campo`, `.campo__etiqueta`, `.campo__grupo`, `.campo__icone`, `.campo__controle`, `.campo__acao` |
+| Validação | `.aviso-erro`, `.aviso-sucesso`, `.campo__grupo--invalido`, `.campo__erro` |
 | Botão e link | `.ligacao`, `.botao`, `.botao--primario`, `.botao__seta` |
 
 ## Regras
@@ -63,3 +64,5 @@ Composição: quadrado verde arredondado com pin branco, centro verde e ponto p�
 3. Nunca use hexadecimal direto na página; ajuste o token em `app.css`.
 4. Mobile primeiro: uma coluna; a partir de `48rem`, apresentação à esquerda e formulário à direita.
 5. Campos, botões e links continuam sendo HTML real e acessível.
+6. Telas de autenticação: `/login/` e `/cadastro/`. O cadastro usa os mesmos componentes do login e exibe erros via `.aviso-erro` e `.campo__erro` (servidor e JavaScript), e sucesso via `.aviso-sucesso`.
+7. Cadastro: usa o `User` padrão do Django com `username = e-mail`; e-mail é único (comparação sem diferenciar maiúsculas) e a senha é salva com hash.

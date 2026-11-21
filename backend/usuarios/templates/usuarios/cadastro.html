@@ -1,0 +1,288 @@
+{% extends "base.html" %}
+
+{% block title %}Criar conta — Nossa Rua{% endblock %}
+
+{% block content %}
+<main class="autenticacao">
+  <section class="apresentacao" aria-label="Apresentação da Nossa Rua">
+    <div class="apresentacao__conteudo">
+      {% include "includes/logo.html" %}
+
+      <div class="apresentacao__frases">
+        <p class="apresentacao__frase">Nossa rua, cuidada por todos.</p>
+        <p class="apresentacao__frase-secundaria">Registre, acompanhe e faça parte.</p>
+      </div>
+
+      <div class="linha-mapa" aria-hidden="true">
+        <span class="linha-mapa__traco"></span>
+        <span class="linha-mapa__marcador"></span>
+      </div>
+    </div>
+  </section>
+
+  <section class="acesso" aria-label="Criação de conta">
+    <div class="acesso__conteudo">
+      <p class="etiqueta">
+        <svg class="etiqueta__icone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M19 10c0 4.6-7 11-7 11S5 14.6 5 10a7 7 0 1 1 14 0Z" />
+          <circle cx="12" cy="10" r="2.2" />
+        </svg>
+        Novo por aqui
+      </p>
+      <h1 class="acesso__titulo">Crie sua conta.</h1>
+      <p class="acesso__subtitulo">Registre ocorrências e acompanhe sua rua de perto.</p>
+
+      <div class="alternador" role="tablist" aria-label="Acesso ou cadastro">
+        <a href="{% url 'login' %}" class="alternador__opcao" role="tab" aria-selected="false">Entrar</a>
+        <a href="{% url 'cadastro' %}" class="alternador__opcao alternador__opcao--ativa" role="tab" aria-selected="true" aria-current="page">Criar conta</a>
+      </div>
+
+      <div class="aviso-erro" role="alert" data-aviso-erro{% if not erros %} hidden{% endif %}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 8v4.5" />
+          <path d="M12 16h.01" />
+        </svg>
+        <p>Revise os campos destacados abaixo.</p>
+      </div>
+
+      {% if sucesso %}
+      <div class="aviso-sucesso" role="status" data-aviso-sucesso>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" />
+          <path d="m8 12 2.5 2.5L16 9" />
+        </svg>
+        <p>{{ sucesso }}</p>
+      </div>
+      {% endif %}
+
+      <form method="post" class="formulario" novalidate data-formulario-cadastro>
+        {% csrf_token %}
+
+        <div class="campo">
+          <label class="campo__etiqueta" for="id_nome">Nome completo</label>
+          <div class="campo__grupo{% if erros.nome %} campo__grupo--invalido{% endif %}">
+            <svg class="campo__icone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="8" r="3.5" />
+              <path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6" />
+            </svg>
+            <input
+              id="id_nome"
+              name="nome"
+              type="text"
+              autocomplete="name"
+              required
+              value="{{ valores.nome|default:'' }}"
+              placeholder="Seu nome completo"
+              class="campo__controle"
+              aria-describedby="erro-nome"{% if erros.nome %} aria-invalid="true"{% endif %}
+            />
+          </div>
+          <p class="campo__erro" id="erro-nome"{% if not erros.nome %} hidden{% endif %}>{{ erros.nome|default:'' }}</p>
+        </div>
+
+        <div class="campo">
+          <label class="campo__etiqueta" for="id_email">E-mail</label>
+          <div class="campo__grupo{% if erros.email %} campo__grupo--invalido{% endif %}">
+            <svg class="campo__icone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3" y="5" width="18" height="14" rx="2.5" />
+              <path d="m3.5 7 8.5 6 8.5-6" />
+            </svg>
+            <input
+              id="id_email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              required
+              value="{{ valores.email|default:'' }}"
+              placeholder="voce@exemplo.com"
+              class="campo__controle"
+              aria-describedby="erro-email"{% if erros.email %} aria-invalid="true"{% endif %}
+            />
+          </div>
+          <p class="campo__erro" id="erro-email"{% if not erros.email %} hidden{% endif %}>{{ erros.email|default:'' }}</p>
+        </div>
+
+        <div class="campo">
+          <label class="campo__etiqueta" for="id_senha">Senha</label>
+          <div class="campo__grupo{% if erros.senha %} campo__grupo--invalido{% endif %}">
+            <svg class="campo__icone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="4.5" y="10" width="15" height="10.5" rx="2.5" />
+              <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+              <path d="M12 14v2.5" />
+            </svg>
+            <input
+              id="id_senha"
+              name="senha"
+              type="password"
+              autocomplete="new-password"
+              required
+              minlength="8"
+              placeholder="Pelo menos 8 caracteres"
+              class="campo__controle"
+              aria-describedby="erro-senha"{% if erros.senha %} aria-invalid="true"{% endif %}
+            />
+            <button
+              type="button"
+              class="campo__acao"
+              data-senha-toggle
+              aria-controls="id_senha"
+              aria-label="Mostrar senha"
+              aria-pressed="false"
+            >
+              <svg data-icon="eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M2.5 12S6 5.8 12 5.8 21.5 12 21.5 12 18 18.2 12 18.2 2.5 12 2.5 12Z" />
+                <circle cx="12" cy="12" r="2.6" />
+              </svg>
+              <svg data-icon="eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" hidden>
+                <path d="M3 3l18 18" />
+                <path d="M10.6 6.2A8.7 8.7 0 0 1 12 6c6 0 9.5 6 9.5 6a16 16 0 0 1-3.2 3.7" />
+                <path d="M6.2 7.8A16 16 0 0 0 2.5 12S6 18 12 18a8.8 8.8 0 0 0 3.4-.7" />
+                <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" />
+              </svg>
+            </button>
+          </div>
+          <p class="campo__erro" id="erro-senha"{% if not erros.senha %} hidden{% endif %}>{{ erros.senha|default:'' }}</p>
+        </div>
+
+        <div class="campo">
+          <label class="campo__etiqueta" for="id_confirmacao_senha">Confirmação de senha</label>
+          <div class="campo__grupo{% if erros.confirmacao_senha %} campo__grupo--invalido{% endif %}">
+            <svg class="campo__icone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="4.5" y="10" width="15" height="10.5" rx="2.5" />
+              <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+              <path d="M12 14v2.5" />
+            </svg>
+            <input
+              id="id_confirmacao_senha"
+              name="confirmacao_senha"
+              type="password"
+              autocomplete="new-password"
+              required
+              minlength="8"
+              placeholder="Repita sua senha"
+              class="campo__controle"
+              aria-describedby="erro-confirmacao-senha"{% if erros.confirmacao_senha %} aria-invalid="true"{% endif %}
+            />
+            <button
+              type="button"
+              class="campo__acao"
+              data-senha-toggle
+              aria-controls="id_confirmacao_senha"
+              aria-label="Mostrar confirmação de senha"
+              aria-pressed="false"
+            >
+              <svg data-icon="eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M2.5 12S6 5.8 12 5.8 21.5 12 21.5 12 18 18.2 12 18.2 2.5 12 2.5 12Z" />
+                <circle cx="12" cy="12" r="2.6" />
+              </svg>
+              <svg data-icon="eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" hidden>
+                <path d="M3 3l18 18" />
+                <path d="M10.6 6.2A8.7 8.7 0 0 1 12 6c6 0 9.5 6 9.5 6a16 16 0 0 1-3.2 3.7" />
+                <path d="M6.2 7.8A16 16 0 0 0 2.5 12S6 18 12 18a8.8 8.8 0 0 0 3.4-.7" />
+                <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" />
+              </svg>
+            </button>
+          </div>
+          <p class="campo__erro" id="erro-confirmacao-senha"{% if not erros.confirmacao_senha %} hidden{% endif %}>{{ erros.confirmacao_senha|default:'' }}</p>
+        </div>
+
+        <button type="submit" class="botao botao--primario">
+          <span>Criar conta</span>
+          <svg class="botao__seta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M5 12h13" />
+            <path d="m13 6 6 6-6 6" />
+          </svg>
+        </button>
+      </form>
+    </div>
+  </section>
+</main>
+
+<script>
+  (function () {
+    const formulario = document.querySelector("[data-formulario-cadastro]");
+    if (!formulario) return;
+
+    document.querySelectorAll("[data-senha-toggle]").forEach(function (botao) {
+      const campo = document.getElementById(botao.getAttribute("aria-controls"));
+      if (!campo) return;
+
+      botao.addEventListener("click", function () {
+        const visivel = campo.type === "password";
+        campo.type = visivel ? "text" : "password";
+        botao.setAttribute("aria-pressed", String(visivel));
+        botao.setAttribute("aria-label", visivel ? "Ocultar senha" : "Mostrar senha");
+        botao.querySelectorAll("[data-icon]").forEach(function (icone) {
+          icone.hidden = (icone.dataset.icon === "eye") === visivel;
+        });
+      });
+    });
+
+    const aviso = document.querySelector("[data-aviso-erro]");
+    const regras = {
+      nome: function (valor) {
+        return valor.trim() ? "" : "Informe seu nome completo.";
+      },
+      email: function (valor) {
+        const texto = valor.trim();
+        if (!texto) return "Informe seu e-mail.";
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(texto) ? "" : "Informe um e-mail válido.";
+      },
+      senha: function (valor) {
+        if (!valor) return "Crie uma senha.";
+        return valor.length < 8 ? "A senha deve ter pelo menos 8 caracteres." : "";
+      },
+      confirmacao_senha: function (valor) {
+        const senha = formulario.elements.senha.value;
+        if (!valor) return "Confirme sua senha.";
+        return senha && valor !== senha ? "As senhas não coincidem." : "";
+      },
+    };
+
+    function marcar(nome, mensagem) {
+      const campo = formulario.elements[nome];
+      const erro = document.getElementById("erro-" + nome.replace(/_/g, "-"));
+      const grupo = campo.closest(".campo__grupo");
+      if (!campo || !erro) return;
+
+      erro.textContent = mensagem;
+      erro.hidden = !mensagem;
+      campo.setAttribute("aria-invalid", mensagem ? "true" : "false");
+      if (grupo) grupo.classList.toggle("campo__grupo--invalido", Boolean(mensagem));
+    }
+
+    Object.keys(regras).forEach(function (nome) {
+      const campo = formulario.elements[nome];
+      if (!campo) return;
+
+      campo.addEventListener("input", function () {
+        marcar(nome, "");
+      });
+      campo.addEventListener("blur", function () {
+        marcar(nome, regras[nome](campo.value));
+      });
+    });
+
+    formulario.addEventListener("submit", function (event) {
+      let quantos = 0;
+      let primeiroInvalido = null;
+
+      Object.keys(regras).forEach(function (nome) {
+        const mensagem = regras[nome](formulario.elements[nome].value);
+        marcar(nome, mensagem);
+        if (mensagem) {
+          quantos += 1;
+          if (!primeiroInvalido) primeiroInvalido = formulario.elements[nome];
+        }
+      });
+
+      if (aviso) aviso.hidden = quantos === 0;
+      if (quantos) {
+        event.preventDefault();
+        if (primeiroInvalido) primeiroInvalido.focus();
+      }
+    });
+  })();
+</script>
+{% endblock %}

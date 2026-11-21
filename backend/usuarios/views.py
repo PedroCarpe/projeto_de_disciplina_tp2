@@ -4,16 +4,20 @@ from usuarios.forms import CadastroUsuarioForm
 
 
 def cadastro(request):
-    if request.method == "POST":
-        form = CadastroUsuarioForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return render(
-                request,
-                "usuarios/cadastro.html",
-                {"form": CadastroUsuarioForm(), "sucesso": True},
-            )
-    else:
-        form = CadastroUsuarioForm()
+    enviou_formulario = request.method == "POST"
+    dados = request.POST if enviou_formulario else None
+    form = CadastroUsuarioForm(dados)
 
-    return render(request, "usuarios/cadastro.html", {"form": form})
+    if enviou_formulario and form.is_valid():
+        form.save()
+        return render(
+            request,
+            "usuarios/cadastro.html",
+            {"form": CadastroUsuarioForm(), "sucesso": True},
+        )
+
+    return render(
+        request,
+        "usuarios/cadastro.html",
+        {"form": form, "sucesso": False},
+    )

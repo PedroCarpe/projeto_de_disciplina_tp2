@@ -1,63 +1,132 @@
 {% extends "base.html" %}
 
-{% block title %}Início — Nossa Rua{% endblock %}
+{% block title %}Mapa de ocorrências — Nossa Rua{% endblock %}
 
 {% block content %}
-<main class="inicio">
-  <header class="inicio__cabecalho">
-    {% include "includes/logo.html" %}
+<main class="mapa-app">
+  <h1 class="visually-hidden">Mapa de ocorrências</h1>
 
-    <nav class="inicio__acoes" aria-label="Acesso à conta">
-      <a href="{% url 'login' %}" class="botao botao--secundario">Entrar</a>
-      <a href="{% url 'cadastro' %}" class="botao botao--primario">
-        <span>Criar conta</span>
-        <svg class="botao__seta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M5 12h13" />
-          <path d="m13 6 6 6-6 6" />
+  <section class="mapa" aria-label="Mapa de ocorrências da sua região">
+    <svg class="mapa__base" viewBox="0 0 390 640" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <rect class="mapa__fundo" width="390" height="640" />
+      <path class="mapa__quadra" d="M16 88h150a18 18 0 0 1 18 18v98a18 18 0 0 1-18 18H16z" />
+      <path class="mapa__agua" d="M252 420c42-20 92-8 138 14v206H212c16-74 4-170 40-220z" />
+      <g class="mapa__ruas" fill="none">
+        <path d="M-20 128 410 42" />
+        <path d="M-20 328 410 288" />
+        <path d="M-20 522 410 480" />
+        <path d="M88 -20 128 660" />
+        <path d="M282 -20 250 660" />
+        <path d="M-20 602 410 558" />
+      </g>
+      <g class="mapa__predio">
+        <rect x="18" y="298" width="54" height="38" rx="8" />
+        <rect x="150" y="160" width="72" height="54" rx="8" />
+        <rect x="300" y="118" width="66" height="44" rx="8" />
+        <rect x="110" y="382" width="96" height="60" rx="8" />
+        <rect x="298" y="352" width="58" height="52" rx="8" />
+        <rect x="20" y="466" width="70" height="40" rx="8" />
+        <rect x="158" y="520" width="60" height="44" rx="8" />
+      </g>
+    </svg>
+
+    <div class="mapa__controles">
+      <form class="mapa__busca" role="search" action="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" />
+          <path d="M20 20l-4-4" />
         </svg>
-      </a>
-    </nav>
-  </header>
+        <input id="busca-mapa" name="busca" type="search" aria-label="Buscar rua ou bairro" placeholder="Buscar rua ou bairro" />
+      </form>
+      <button class="mapa__filtros" type="button" aria-label="Filtros">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <path d="M4 7h16M7 12h10M10 17h4" />
+        </svg>
+      </button>
+    </div>
 
-  <section class="inicio__hero">
-    <p class="etiqueta">
-      <svg class="etiqueta__icone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M19 10c0 4.6-7 11-7 11S5 14.6 5 10a7 7 0 1 1 14 0Z" />
-        <circle cx="12" cy="10" r="2.2" />
+    <div class="mapa__categorias" aria-label="Filtrar por categoria">
+      <span class="chip chip--ativa">Tudo</span>
+      <span class="chip chip--pessego">Vias</span>
+      <span class="chip chip--manteiga">Luz</span>
+      <span class="chip chip--ceu">Drenagem</span>
+      <span class="chip chip--menta">Limpeza</span>
+    </div>
+
+    <svg class="mapa__pin mapa__pin--pessego mapa__pin--1" viewBox="0 0 40 48" role="img" aria-label="Ocorrência: via">
+      <path d="M20 46s-16-13-16-26a16 16 0 1 1 32 0c0 13-16 26-16 26z" />
+      <circle cx="20" cy="20" r="6" />
+    </svg>
+    <svg class="mapa__pin mapa__pin--manteiga mapa__pin--2" viewBox="0 0 40 48" role="img" aria-label="Ocorrência: luz">
+      <path d="M20 46s-16-13-16-26a16 16 0 1 1 32 0c0 13-16 26-16 26z" />
+      <circle cx="20" cy="20" r="6" />
+    </svg>
+    <svg class="mapa__pin mapa__pin--menta mapa__pin--3" viewBox="0 0 40 48" role="img" aria-label="Ocorrência: limpeza">
+      <path d="M20 46s-16-13-16-26a16 16 0 1 1 32 0c0 13-16 26-16 26z" />
+      <circle cx="20" cy="20" r="6" />
+    </svg>
+    <svg class="mapa__pin mapa__pin--ceu mapa__pin--4" viewBox="0 0 40 48" role="img" aria-label="Ocorrência: drenagem">
+      <path d="M20 46s-16-13-16-26a16 16 0 1 1 32 0c0 13-16 26-16 26z" />
+      <circle cx="20" cy="20" r="6" />
+    </svg>
+    <svg class="mapa__pin mapa__pin--pessego mapa__pin--5" viewBox="0 0 40 48" role="img" aria-label="Ocorrência: via">
+      <path d="M20 46s-16-13-16-26a16 16 0 1 1 32 0c0 13-16 26-16 26z" />
+      <circle cx="20" cy="20" r="6" />
+    </svg>
+    <span class="mapa__eu" aria-hidden="true"></span>
+
+    <button class="mapa__localizacao" type="button" aria-label="Minha localização">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="4" />
+        <path d="M12 2v4M12 18v4M2 12h4M18 12h4" />
       </svg>
-      Nossa rua, cuidada por todos
-    </p>
-    <h1 class="inicio__titulo">Cuide do seu bairro. <span>Registre, acompanhe, melhore.</span></h1>
-    <p class="inicio__descricao">
-      Aponte o que precisa de atenção, acompanhe cada etapa e veja a sua rua mudar.
-      Simples para quem mora aqui e claro para quem cuida da cidade.
-    </p>
-    <a href="{% url 'cadastro' %}" class="ligacao inicio__link">Quero começar agora →</a>
-  </section>
+    </button>
 
-  <section class="inicio__recursos" aria-label="Como funciona">
-    <article class="recurso recurso--pessego">
-      <span class="recurso__numero">01</span>
-      <h2>Registre</h2>
-      <p>Descreva o problema e marque o lugar. Poucos passos, sem complicação.</p>
-    </article>
-    <article class="recurso recurso--ceu">
-      <span class="recurso__numero">02</span>
-      <h2>Acompanhe</h2>
-      <p>Veja o status de cada ocorrência, da análise até a solução.</p>
-    </article>
-    <article class="recurso recurso--menta">
-      <span class="recurso__numero">03</span>
-      <h2>Melhore</h2>
-      <p>Juntos, transformamos pequenos apontamentos em mudanças reais.</p>
+    <article class="ocorrencia" aria-label="Ocorrência próxima">
+      <div class="ocorrencia__topo">
+        <span class="chip chip--manteiga">Iluminação apagada</span>
+        <span class="chip chip--ceu">Em análise</span>
+      </div>
+      <p class="ocorrencia__titulo">Rua do Largo, 45</p>
+      <p class="ocorrencia__meta">Registrada em 12 nov 2026, 09:12 · a 120 m de você</p>
+      <div class="ocorrencia__acoes">
+        <a href="#" class="botao botao--primario">Ver detalhes</a>
+        <button type="button" class="botao botao--secundario">Acompanhar</button>
+      </div>
     </article>
   </section>
 
-  <section class="inicio__estados" aria-label="Status das ocorrências">
-    <span class="estado estado--registrada">Registrada</span>
-    <span class="estado estado--analise">Em análise</span>
-    <span class="estado estado--andamento">Em andamento</span>
-    <span class="estado estado--resolvida">Resolvida</span>
-  </section>
+  <nav class="rodape-navegacao" aria-label="Navegação principal">
+    <a href="#" class="rodape-navegacao__item rodape-navegacao__item--ativo" aria-current="page">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14" />
+      </svg>
+      Mapa
+    </a>
+    <a href="#" class="rodape-navegacao__item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <path d="M5 20V11M12 20V5M19 20v-7" />
+      </svg>
+      Dados
+    </a>
+    <a href="#" class="rodape-navegacao__registrar" aria-label="Registrar ocorrência">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true">
+        <path d="M12 5v14M5 12h14" />
+      </svg>
+    </a>
+    <a href="#" class="rodape-navegacao__item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M6 17V11a6 6 0 1 1 12 0v6l1.5 2h-15zM10 21h4" />
+      </svg>
+      Avisos
+    </a>
+    <a href="#" class="rodape-navegacao__item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="8" r="4" />
+        <path d="M4 21c1-4 4-6 8-6s7 2 8 6" />
+      </svg>
+      Perfil
+    </a>
+  </nav>
 </main>
 {% endblock %}

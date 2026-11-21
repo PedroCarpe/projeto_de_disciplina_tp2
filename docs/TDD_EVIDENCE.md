@@ -194,28 +194,34 @@ foram escritos depois da implementação e **não** são apresentados como TDD:
 
 Todos passaram já na primeira execução após o GREEN.
 
-## Página inicial — ciclo curto
+## Página inicial logada — mapa de ocorrências
 
-A rota `/` redirecionava para `/login/`. Agora ela renderiza `usuarios/inicio.html`
-(`name="inicio"`), e “Explorar como visitante”, no login, aponta para ela.
+A rota `/` redirecionava para `/login/`. Agora ela renderiza a tela principal do app em
+`usuarios/inicio.html` (`name="inicio"`). A referência “Mapa de ocorrências” foi usada apenas
+como inspiração de layout: textos, categorias, endereço e desenho do mapa são originais do
+Nossa Rua, sem copiar a tela enviada literalmente. O link “Ver mapa de ocorrências”, no login,
+aponta para ela.
 
-**RED** — dois testes escritos antes da view:
+**RED** — dois testes escritos antes do novo template:
 
-- `HomeViewTests.test_root_renderiza_pagina_inicial`
-- `HomeViewTests.test_pagina_inicial_tem_chamada_e_acoes`
+- `HomeViewTests.test_root_renderiza_mapa_de_ocorrencias`
+- `HomeViewTests.test_mapa_tem_filtros_e_ocorrencia_destaque`
+
+Saída real da última rodada RED:
 
 ```text
-........FF..........
-AssertionError: 302 != 200
-Ran 20 tests in 1.571s
+FF
+AssertionError: False is not true : Couldn't find 'Vias' in the following response
+Ran 2 tests in 0.015s
 
 FAILED (failures=2)
 ```
 
-**GREEN** — `home_view`, rota `""` em `frontend/urls.py`, remoção do `RedirectView` em
-`setup/urls.py`, template `inicio.html` e classes no `app.css`. Um ajuste foi necessário no teste:
-a frase da referência ficou dividida por um `<span>` para estilo, então a asserção passou a
-verificar as duas partes do texto.
+**GREEN** — template reescrito com mapa ilustrativo em SVG próprio, busca, filtros
+(Vias / Luz / Drenagem / Limpeza), pins de ocorrências, cartão em destaque
+(“Iluminação apagada · Rua do Largo, 45”) e navegação inferior (Mapa / Dados / Avisos / Perfil).
+Novos tokens de mapa foram adicionados ao `app.css`. Nenhuma lógica de autenticação foi
+acrescentada: esta é a **interface** da tela logada, sem bloqueio de acesso.
 
 **REFACTOR** — sem extração de código; a validação final está registrada abaixo.
 
@@ -243,11 +249,11 @@ Saída consolidada:
 python manage.py test    → Ran 20 tests — OK
 python manage.py check   → System check identified no issues (0 silenced).
 ruff check .             → All checks passed!
-pytest                   → 20 passed in 2.14s
-TOTAL                    → 249 statements, 2 miss, 99% (99.20%)
+pytest                   → 20 passed in 2.33s
+TOTAL                    → 255 statements, 2 miss, 99% (99.22%)
 ```
 
-**Interpretação da cobertura:** os 99,20% (249 instruções, 2 não executadas; no ciclo do cadastro
+**Interpretação da cobertura:** os 99,22% (255 instruções, 2 não executadas; no ciclo do cadastro
 eram 99,04% — 209 instruções, 2 não executadas) representam a proporção de **instruções de código
 executadas** pelos testes no escopo analisado. Esse indicador complementa, mas não substitui, a
 verificação dos comportamentos e das regras de negócio. A meta mínima é 80%, definida em

@@ -56,7 +56,7 @@ Composição: quadrado verde arredondado com pin branco, centro verde e ponto p�
 | Formulário | `.formulario`, `.campo`, `.campo__etiqueta`, `.campo__grupo`, `.campo__icone`, `.campo__controle`, `.campo__acao` |
 | Validação | `.aviso-erro`, `.aviso-sucesso`, `.campo__grupo--invalido`, `.campo__erro` |
 | Botão e link | `.ligacao`, `.botao`, `.botao--primario`, `.botao--secundario`, `.botao__seta` |
-| Página inicial | `.inicio`, `.inicio__cabecalho`, `.inicio__acoes`, `.inicio__hero`, `.inicio__titulo`, `.inicio__descricao`, `.inicio__recursos`, `.recurso`, `.recurso--pessego`, `.recurso--ceu`, `.recurso--menta`, `.inicio__estados`, `.estado`, `.estado--registrada`, `.estado--analise`, `.estado--andamento`, `.estado--resolvida` |
+| Mapa inicial | `.mapa-app`, `.mapa`, `.mapa__base`, `.mapa__controles`, `.mapa__busca`, `.mapa__filtros`, `.mapa__categorias`, `.chip`, `.chip--ativa`, `.chip--pessego`, `.chip--manteiga`, `.chip--ceu`, `.chip--menta`, `.mapa__pin`, `.mapa__eu`, `.mapa__localizacao`, `.ocorrencia`, `.ocorrencia__topo`, `.ocorrencia__titulo`, `.ocorrencia__meta`, `.ocorrencia__acoes`, `.rodape-navegacao`, `.rodape-navegacao__item`, `.rodape-navegacao__registrar` |
 
 ## Regras
 
@@ -67,4 +67,4 @@ Composição: quadrado verde arredondado com pin branco, centro verde e ponto p�
 5. Campos, botões e links continuam sendo HTML real e acessível.
 6. Telas de autenticação: `/login/` e `/cadastro/`. O cadastro usa os mesmos componentes do login e exibe erros via `.aviso-erro` e `.campo__erro` (servidor e JavaScript), e sucesso via `.aviso-sucesso`.
 7. Cadastro: usa o `User` padrão do Django com `username = e-mail`; e-mail é único (comparação sem diferenciar maiúsculas) e a senha é salva com hash.
-8. Página inicial pública em `/` (`name="inicio"`), servida por `home_view`; “Explorar como visitante” no login aponta para ela. Cartões e pastéis seguem os tokens existentes.
+8. Página inicial logada em `/` (`name="inicio"`), servida por `home_view`: mapa de ocorrências com busca, filtros, pins, cartão de ocorrência e navegação inferior. “Ver mapa de ocorrências”, no login, aponta para ela. Ainda sem bloqueio de autenticação.

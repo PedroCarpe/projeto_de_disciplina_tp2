@@ -4,24 +4,30 @@ from django.urls import reverse
 
 
 class HomeViewTests(TestCase):
-    def test_root_renderiza_pagina_inicial(self) -> None:
+    def test_root_renderiza_mapa_de_ocorrencias(self) -> None:
         resposta = self.client.get("/")
 
         self.assertEqual(resposta.status_code, 200)
         self.assertTemplateUsed(resposta, "base.html")
-        self.assertTemplateUsed(resposta, "includes/logo.html")
         self.assertTemplateUsed(resposta, "usuarios/inicio.html")
+        self.assertContains(resposta, "Mapa de ocorrências")
+        self.assertContains(resposta, "Buscar rua ou bairro")
 
-    def test_pagina_inicial_tem_chamada_e_acoes(self) -> None:
+    def test_mapa_tem_filtros_e_ocorrencia_destaque(self) -> None:
         resposta = self.client.get("/")
 
-        self.assertContains(resposta, "Cuide do seu bairro.")
-        self.assertContains(resposta, "Registre, acompanhe, melhore.")
-        self.assertContains(resposta, f'href="{reverse("login")}"')
-        self.assertContains(resposta, f'href="{reverse("cadastro")}"')
-        self.assertContains(resposta, "Registre")
-        self.assertContains(resposta, "Acompanhe")
-        self.assertContains(resposta, "Melhore")
+        self.assertContains(resposta, "Vias")
+        self.assertContains(resposta, "Luz")
+        self.assertContains(resposta, "Drenagem")
+        self.assertContains(resposta, "Limpeza")
+        self.assertContains(resposta, "Iluminação apagada")
+        self.assertContains(resposta, "Em análise")
+        self.assertContains(resposta, "Rua do Largo, 45")
+        self.assertContains(resposta, "Ver detalhes")
+        self.assertContains(resposta, "Acompanhar")
+        self.assertContains(resposta, "Dados")
+        self.assertContains(resposta, "Avisos")
+        self.assertContains(resposta, "Perfil")
 
 
 class LoginViewTests(TestCase):
@@ -39,7 +45,7 @@ class LoginViewTests(TestCase):
         self.assertContains(response, "Nossa Rua")
         self.assertContains(response, "Nossa rua, cuidada por todos.")
         self.assertContains(response, "Registre, acompanhe e faça parte.")
-        self.assertContains(response, "Explorar como visitante")
+        self.assertContains(response, "Ver mapa de ocorrências")
         self.assertContains(response, f'href="{reverse("inicio")}"')
         self.assertContains(response, "Acesso ao sistema")
         self.assertContains(response, "Bom ter você de volta.")

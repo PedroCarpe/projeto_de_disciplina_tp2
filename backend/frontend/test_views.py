@@ -606,3 +606,29 @@ class CadastroViewTests(TestCase):
         self.assertEqual(resposta.status_code, 200)
         self.assertContains(resposta, "Este e-mail já está cadastrado.")
         self.assertEqual(User.objects.count(), 1)
+
+class RegistrarOcorrenciaTests(TestCase):
+    def setUp(self) -> None:
+        self.usuario = User.objects.create_user(
+            username="ana@exemplo.com",
+            email="ana@exemplo.com",
+            password="senhaSegura123",
+        )
+
+    def test_visitante_e_encaminhado_para_login(self) -> None:
+        resposta = self.client.get(reverse("registrar_ocorrencia"))
+
+        self.assertEqual(resposta.status_code, 302)
+        self.assertIn(reverse("login"), resposta.url)
+
+    def test_autenticado_ve_formulario_de_registro(self) -> None:
+        self.client.force_login(self.usuario)
+
+        resposta = self.client.get(reverse("registrar_ocorrencia"))
+
+        self.assertEqual(resposta.status_code, 200)
+        self.assertTemplateUsed(resposta, "base.html")
+        self.assertTemplateUsed(resposta, "usuarios/registrar_ocorrencia.html")
+        self.assertContains(resposta, "Registrar ocorrência")
+        for campo in ("tipo", "descricao", "latitude", "longitude"):
+            self.assertContains(resposta, f'name="{campo}"')

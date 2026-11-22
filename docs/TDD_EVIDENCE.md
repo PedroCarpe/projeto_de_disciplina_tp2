@@ -316,7 +316,8 @@ configuração; `home_mapa.js` inicializa o mapa, adiciona tiles do OSM, control
 `referrerPolicy: "no-referrer"` e um fallback automático para CARTO (`light_all`, também baseado
 em dados OSM) após 3 `tileerror`s. Novo RED: `Ran 6 tests ... FAILED (failures=2)`;GREEN:
 `Ran 29 tests ... OK`. Um teste corrigiu a asserção para o nome real da API do Leaflet,
-`removeLayer`.
+`removeLayer`. (O `referrerPolicy: "no-referrer"` foi removido depois; ver a seção “Correção da
+política de tiles”.)
 
 Testes manuais no navegador (Chromium, servidor local `runserver`): Leaflet `1.9.4`, 10 tiles
 carregadas, 1 CSS e 1 JS, centro inicial `(-23.5505, -46.6333)`, zoom `13`. Zoom `14 → 15 → 14`
@@ -398,6 +399,69 @@ A pedido, o mesmo padrão foi aplicado a `/mapa/` sem novo ciclo TDD: `mapa.html
 dentro de um painel arredondado; em 360/390/430 px mede 240/240/266 px de altura, sem rolagem
 horizontal, com os controles de zoom em 44 px e 8 tiles carregadas.
 
+## Correção da política de tiles
+
+Revisão do `home_mapa.js` apontou dois problemas no carregamento dos tiles:
+
+1. `referrerPolicy: "no-referrer"` impedia o navegador de enviar o `Referer` nas requisições de
+   tiles, contrariando a política de uso do servidor público do OpenStreetMap (que pede para a
+   aplicação se identificar quando possível). A configuração foi removida dos dois provedores.
+2. O endpoint do OSM usava o formato antigo com subdomínios (`{s}.tile.openstreetmap.org`); foi
+   trocado pelo recomendado `https://tile.openstreetmap.org/{z}/{x}/{y}.png`.
+3. O fallback para CARTO continua, mas apenas como recurso para **falha técnica** (`tileerror`).
+   Um bloqueio por política pode responder `200` com uma imagem de aviso; nesse caso o Leaflet
+   dispara `tileload`, não `tileerror`, e trocar de provedor não resolve a causa.
+4. `base.html` passou a declarar `<meta name="referrer" content="strict-origin-when-cross-origin">`.
+   No navegador embutido usado na verificação, o padrão do Electron enviava `Referer` vazio mesmo
+   sem `no-referrer` nas imagens; com a meta explícita, o cabeçalho passou a conter a origem da
+   aplicação (`http://127.0.0.1:8024/`). Isso vale para todos os provedores de tiles.
+
+Sem novo ciclo TDD: o teste de guarda do JS foi reescrito para exigir o endpoint sem subdomínios e
+a ausência de `referrerPolicy`/`no-referrer`, e o teste do `base.html` passou a cobrir a meta de
+referrer. A suíte segue com 54 testes.
+
+Verificação no navegador: 8 tiles carregadas (`200`, `image/png`) apenas em
+`tile.openstreetmap.org`, nenhuma com atributo `referrerpolicy`, e `Referer` igual à origem da
+página. Nenhum erro de console.
+
+## Interface de exploração do mapa
+
+A pedido, `/mapa/` deixou de ser um componente dentro de um cartão e virou tela de exploração.
+Na sequência, a reformulação visual aproximou a página da referência anexada: painel branco de
+28 px de raio ocupando 90% da largura útil, sidebar de filtros de 25% separada por linha vertical
+suave, barra superior com busca “Buscar região, bairro ou endereço...” e “Minha localização”,
+canvas de 520/550 px no desktop e 416 px no celular, cartão flutuante à direita no desktop e
+inferior no celular, e legenda abaixo do mapa. O cabeçalho usa exatamente o eyebrow, o título e o
+subtítulo pedidos.
+
+Os filtros são “Tipo de ocorrência”, “Período” e “Status”, com “Limpar filtros” e “Aplicar filtros”.
+Os pinos `L.divIcon` passaram a distinguir buraco, iluminação, lixo e calçada. O cartão só aparece
+para uma ocorrência real selecionada e mostra categoria, título, local, data, status, descrição e
+os botões desabilitados “Ver detalhes” e “Acompanhar” — não há rota ou ação fictícia. Nenhum dado,
+número, imagem ou estatística foi inventado; `configuracao_mapa()` continua entregando
+`"ocorrencias": []` e o estado vazio permanece bem apresentado sobre o mapa.
+
+TDD mantido no mínimo razoável: nenhum teste novo foi criado para detalhe estético. Apenas dois
+testes de guarda existentes foram ajustados ao novo texto/altura e um teste da API do JS passou a
+verificar os novos seletores e categorias. O teste de tiles continua verificando a ordem OSM →
+CARTO, a ausência de `referrerPolicy`/`no-referrer` e a presença de `tileerror`/`tileload`; a
+tentativa de usar CARTO Positron como principal foi revertida a pedido. Também foi removida a
+mensagem inicial “A localização é opcional; o mapa funciona sem ela.” — o elemento
+`data-mapa-status` permanece vazio e sem texto visível, apenas como região `aria-live` para
+feedback eventual da geolocalização. Os blocos “403 Access blocked” das capturas eram imagens de
+erro do servidor do OSM; com o `Referer` corrigido, a verificação carregou 12 tiles com `200`, sem
+mensagem de bloqueio.
+
+Verificação no navegador em viewport desktop de 1440 px: painel 1140×709 px, sidebar 285 px,
+coluna do mapa 855 px, canvas 807×550 px com raio de 20 px, busca e botões com 44 px de altura,
+sem rolagem horizontal e sem erro de console. Injetando quatro ocorrências apenas na sessão do
+navegador pela API pública, a contagem tornou-se “4 ocorrências”, surgiram quatro pinos com classes
+por categoria e o cartão mostrou todos os campos, incluindo descrição, com `Ver detalhes` e
+`Acompanhar` desabilitados. Filtro por categoria e busca por bairro reduziram para 1 e
+“Limpar filtros” restaurou 4; “Aplicar filtros” também fecha o painel no celular. Em 360/390/430 px
+o canvas mediu 416 px, os filtros abriram por botão com `aria-expanded`, o cartão apareceu na parte
+inferior sem cobrir todo o mapa e não houve rolagem horizontal.
+
 ## Verificação final
 
 Comandos executados a partir de `backend/` (Python 3.11.9, Django 5.2.19, pytest 9.2.0):
@@ -419,14 +483,14 @@ addopts = "--cov=. --cov-report=term-missing --cov-fail-under=80"
 Saída consolidada:
 
 ```text
-python manage.py test    → Ran 54 tests — OK
+python manage.py test    → Ran 55 tests — OK
 python manage.py check   → System check identified no issues (0 silenced).
 ruff check .             → All checks passed!
-pytest                   → 54 passed in 5.16s
-TOTAL                    → 459 statements, 2 miss, 99% (99.56%)
+pytest                   → 55 passed in 5.58s
+TOTAL                    → 479 statements, 2 miss, 99% (99.58%)
 ```
 
-**Interpretação da cobertura:** os 99,56% (459 instruções, 2 não executadas; no ciclo do cadastro
+**Interpretação da cobertura:** os 99,58% (479 instruções, 2 não executadas; no ciclo do cadastro
 eram 99,04% — 209 instruções, 2 não executadas) representam a proporção de **instruções de código
 executadas** pelos testes no escopo analisado. Esse indicador complementa, mas não substitui, a
 verificação dos comportamentos e das regras de negócio. A meta mínima é 80%, definida em

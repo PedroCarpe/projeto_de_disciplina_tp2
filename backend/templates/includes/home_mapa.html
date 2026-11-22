@@ -1,37 +1,215 @@
-<section id="mapa" class="home-mapa flex flex-col gap-3" aria-labelledby="mapa-titulo">
-  <div class="home-mapa__cabecalho flex flex-wrap items-baseline justify-between gap-2">
-    <h2 id="mapa-titulo" class="m-0 text-lg font-extrabold tracking-[-0.03em] text-tinta">Mapa de ocorrências</h2>
-    <p class="home-mapa__legenda m-0 text-[0.8125rem] text-[#67756c]">Sua região</p>
-  </div>
+<section id="mapa" class="home-mapa mx-auto w-full pb-10 sm:w-[92%] lg:w-[90%]" aria-labelledby="mapa-titulo">
+  <h2 id="mapa-titulo" class="sr-only">Mapa de ocorrências</h2>
 
-  <div
-    id="home-mapa-canvas"
-    class="home-mapa__area relative aspect-[4/3] max-h-[19rem] min-h-[15rem] w-full overflow-hidden rounded-cartao border border-borda bg-[#f1ece2] md:max-h-[20rem]"
-    data-mapa-canvas
-    role="application"
-    aria-label="Mapa interativo de ocorrências. Use os controles de zoom para navegar."
-  >
-    <div
-      class="home-mapa__vazio pointer-events-none absolute bottom-3.5 left-3.5 right-3.5 flex max-w-sm flex-col gap-1 rounded-[1.125rem] bg-white/95 p-3 opacity-95 shadow-[0_2px_6px_rgba(38,50,59,0.12)]"
-      data-mapa-vazio
-      role="status"
-    >
-      <strong class="text-[0.9375rem]">Nenhuma ocorrência publicada ainda.</strong>
-      <p class="m-0 text-[0.8125rem] leading-[1.45] text-[#67756c]">Quando houver registros, eles aparecerão aqui com tipo, data e status.</p>
+  <div class="overflow-hidden rounded-[1.75rem] border border-[#ebe8e0] bg-white shadow-[0_22px_60px_rgba(38,50,59,0.09)]">
+    <div class="flex flex-col lg:flex-row">
+      <!-- Filtros: barra lateral no desktop, painel expansível no celular. -->
+      <aside
+        id="mapa-filtros"
+        class="hidden flex-col border-b border-[#edf0eb] bg-[#fdfcf9] p-5 sm:p-6 lg:flex lg:w-1/4 lg:border-b-0 lg:border-r lg:p-7"
+      >
+        <div class="flex items-start justify-between gap-3">
+          <h3 class="m-0 flex items-center gap-2 text-[0.9375rem] font-extrabold text-verde-escuro">
+            <svg class="h-4 w-4 text-verde" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 6h16M7 12h10m-7 6h4" />
+            </svg>
+            Filtros
+          </h3>
+          <button type="button" data-mapa-limpar class="m-0 border-0 bg-transparent p-0 text-[0.6875rem] font-extrabold text-verde underline decoration-verde/30 underline-offset-4 transition hover:decoration-verde focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-verde">
+            Limpar filtros
+          </button>
+        </div>
+
+        <p class="mb-7 mt-2 text-[0.75rem] leading-relaxed text-[#879389]">
+          Refine as ocorrências exibidas no mapa.
+        </p>
+
+        <div class="flex flex-col gap-6">
+          <label class="flex flex-col gap-2">
+            <span class="text-[0.6875rem] font-extrabold tracking-[0.02em] text-[#5e6b73]">Tipo de ocorrência</span>
+            <span class="relative block">
+              <select data-filtro="categoria" class="h-11 w-full appearance-none rounded-xl border border-[#e8e5dc] bg-white px-3.5 pr-9 text-[0.8125rem] font-semibold text-tinta shadow-[0_1px_2px_rgba(38,50,59,0.03)] transition focus:border-verde focus:outline-none focus:ring-2 focus:ring-salvia/70">
+                <option value="todas">Todos os tipos</option>
+                <option value="buraco">Buracos</option>
+                <option value="iluminacao">Iluminação</option>
+                <option value="lixo">Lixo</option>
+                <option value="calcada">Calçadas</option>
+              </select>
+              <svg class="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#879389]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </span>
+          </label>
+
+          <label class="flex flex-col gap-2">
+            <span class="text-[0.6875rem] font-extrabold tracking-[0.02em] text-[#5e6b73]">Período</span>
+            <span class="relative block">
+              <select data-filtro="periodo" class="h-11 w-full appearance-none rounded-xl border border-[#e8e5dc] bg-white px-3.5 pr-9 text-[0.8125rem] font-semibold text-tinta shadow-[0_1px_2px_rgba(38,50,59,0.03)] transition focus:border-verde focus:outline-none focus:ring-2 focus:ring-salvia/70">
+                <option value="todos">Qualquer período</option>
+                <option value="7">Últimos 7 dias</option>
+                <option value="30">Últimos 30 dias</option>
+                <option value="365">Últimos 12 meses</option>
+              </select>
+              <svg class="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#879389]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </span>
+          </label>
+
+          <label class="flex flex-col gap-2">
+            <span class="text-[0.6875rem] font-extrabold tracking-[0.02em] text-[#5e6b73]">Status</span>
+            <span class="relative block">
+              <select data-filtro="status" class="h-11 w-full appearance-none rounded-xl border border-[#e8e5dc] bg-white px-3.5 pr-9 text-[0.8125rem] font-semibold text-tinta shadow-[0_1px_2px_rgba(38,50,59,0.03)] transition focus:border-verde focus:outline-none focus:ring-2 focus:ring-salvia/70">
+                <option value="todos">Todos os status</option>
+                <option value="aberto">Aberto</option>
+                <option value="andamento">Em andamento</option>
+                <option value="resolvido">Resolvido</option>
+              </select>
+              <svg class="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#879389]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </span>
+          </label>
+        </div>
+
+        <button
+          type="button"
+          data-mapa-aplicar
+          class="mt-7 inline-flex h-11 w-full items-center justify-center rounded-xl bg-verde-escuro px-4 text-[0.8125rem] font-extrabold text-white shadow-[0_8px_18px_rgba(31,82,64,0.18)] transition hover:bg-[#173e31] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-verde-escuro"
+        >
+          Aplicar filtros
+        </button>
+
+        <p data-mapa-contador class="mt-auto mb-0 pt-7 text-[0.6875rem] font-bold text-[#879389]">0 ocorrências</p>
+      </aside>
+
+      <!-- Mapa e controles -->
+      <div class="min-w-0 flex-1 p-4 sm:p-5 lg:p-6">
+        <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div class="relative min-w-0 flex-1">
+            <label class="sr-only" for="mapa-busca">Buscar região, bairro ou endereço</label>
+            <svg class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#879389]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="7" />
+              <path d="m20 20-4-4" />
+            </svg>
+            <input
+              id="mapa-busca"
+              type="search"
+              data-mapa-busca
+              placeholder="Buscar região, bairro ou endereço..."
+              autocomplete="off"
+              class="h-11 w-full rounded-xl border border-[#e8e5dc] bg-white pl-10 pr-3 text-[0.8125rem] text-tinta shadow-[0_1px_2px_rgba(38,50,59,0.03)] placeholder:text-[#9aa49e] focus:border-verde focus:outline-none focus:ring-2 focus:ring-salvia/70"
+            />
+          </div>
+
+          <div class="flex shrink-0 gap-2">
+            <button
+              type="button"
+              data-mapa-filtros-toggle
+              aria-expanded="false"
+              aria-controls="mapa-filtros"
+              class="inline-flex h-11 items-center gap-2 rounded-xl border border-[#e8e5dc] bg-white px-3.5 text-[0.75rem] font-extrabold text-verde-escuro transition hover:bg-salvia/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-verde lg:hidden"
+            >
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M4 6h16M7 12h10m-7 6h4" />
+              </svg>
+              Filtros
+            </button>
+
+            <button
+              type="button"
+              data-mapa-localizacao
+              class="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-verde-escuro bg-white px-3.5 text-[0.75rem] font-extrabold text-verde-escuro shadow-[0_2px_8px_rgba(31,82,64,0.05)] transition hover:bg-salvia/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-verde"
+            >
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="3" />
+                <path d="M12 2v3m0 14v3M2 12h3m14 0h3" />
+              </svg>
+              Minha localização
+            </button>
+          </div>
+        </div>
+
+        <div
+          id="home-mapa-canvas"
+          class="home-mapa__area relative h-[26rem] w-full overflow-hidden rounded-[1.25rem] border border-[#e8e5dc] bg-[#f1ece2] shadow-[0_10px_28px_rgba(38,50,59,0.06)] lg:h-[520px] xl:h-[550px]"
+          data-mapa-canvas
+          role="application"
+          aria-label="Mapa interativo de ocorrências. Use os controles de zoom para navegar."
+        >
+          <div
+            class="home-mapa__vazio absolute inset-0 z-[800] grid place-items-center p-5"
+            data-mapa-vazio
+            role="status"
+            hidden
+          >
+            <div class="max-w-xs rounded-[1.25rem] border border-[#ebe8e0] bg-white/95 px-5 py-4 text-center shadow-[0_12px_30px_rgba(38,50,59,0.12)]">
+              <span class="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-full bg-salvia/70 text-verde">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M19 10c0 4.6-7 11-7 11S5 14.6 5 10a7 7 0 1 1 14 0Z" />
+                  <circle cx="12" cy="10" r="2.2" />
+                </svg>
+              </span>
+              <strong data-mapa-vazio-titulo class="m-0 block text-[0.875rem] font-extrabold text-verde-escuro">Nenhuma ocorrência publicada ainda.</strong>
+              <p data-mapa-vazio-texto class="mb-0 mt-1.5 text-[0.75rem] leading-relaxed text-[#67756c]">Quando houver registros, eles aparecerão aqui com tipo, local, data e status.</p>
+            </div>
+          </div>
+
+          <article
+            data-mapa-detalhe
+            class="absolute bottom-3 left-3 right-3 z-[900] hidden max-h-[48%] overflow-y-auto rounded-[1.25rem] border border-[#ebe8e0] bg-white p-4 shadow-[0_18px_40px_rgba(31,82,64,0.18)] sm:p-5 md:bottom-auto md:left-auto md:right-5 md:top-1/2 md:w-[20rem] md:max-h-[80%] md:-translate-y-1/2"
+            aria-live="polite"
+          >
+            <div class="flex items-start justify-between gap-3">
+              <span data-detalhe-categoria class="inline-flex items-center rounded-full bg-salvia/80 px-2.5 py-1 text-[0.625rem] font-extrabold uppercase tracking-[0.08em] text-verde-escuro">Ocorrência</span>
+              <button type="button" data-detalhe-fechar aria-label="Fechar detalhes" class="-mr-1 -mt-1 grid h-8 w-8 shrink-0 place-items-center rounded-lg text-[#879389] transition hover:bg-salvia/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-verde">&times;</button>
+            </div>
+
+            <h3 data-detalhe-tipo class="mb-2 mt-3 text-[0.9375rem] font-extrabold leading-snug text-tinta"></h3>
+
+            <p class="m-0 flex items-start gap-2 text-[0.75rem] leading-relaxed text-[#67756c]">
+              <svg class="mt-0.5 h-3.5 w-3.5 shrink-0 text-verde" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M19 10c0 4.6-7 11-7 11S5 14.6 5 10a7 7 0 1 1 14 0Z" />
+                <circle cx="12" cy="10" r="2.2" />
+              </svg>
+              <span data-detalhe-local></span>
+            </p>
+
+            <div class="mt-4 flex items-center justify-between gap-3 border-t border-[#edf0eb] pt-3">
+              <div>
+                <span class="block text-[0.5625rem] font-extrabold uppercase tracking-[0.1em] text-[#9aa49e]">Registrado em</span>
+                <span data-detalhe-data class="mt-0.5 block text-[0.75rem] font-bold text-tinta"></span>
+              </div>
+              <span data-detalhe-status class="inline-flex items-center rounded-full bg-salvia/70 px-2.5 py-1 text-[0.625rem] font-extrabold text-verde-escuro"></span>
+            </div>
+
+            <p data-detalhe-descricao class="mb-0 mt-3 text-[0.75rem] leading-relaxed text-[#67756c]"></p>
+
+            <div class="mt-4 grid grid-cols-2 gap-2">
+              <button type="button" disabled aria-disabled="true" title="Página de detalhes ainda será integrada." class="inline-flex h-10 items-center justify-center rounded-xl bg-verde-escuro px-3 text-[0.6875rem] font-extrabold text-white opacity-70">
+                Ver detalhes
+              </button>
+              <button type="button" data-detalhe-acompanhar disabled aria-disabled="true" title="Recurso de acompanhamento ainda será integrado." class="inline-flex h-10 items-center justify-center rounded-xl border border-verde px-3 text-[0.6875rem] font-extrabold text-verde transition hover:bg-salvia/40">
+                Acompanhar
+              </button>
+            </div>
+          </article>
+        </div>
+
+        <div class="mt-5 flex flex-wrap items-center justify-between gap-x-5 gap-y-3 border-t border-[#edf0eb] pt-4">
+          <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <span class="text-[0.625rem] font-extrabold uppercase tracking-[0.12em] text-[#9aa49e]">Legenda</span>
+            <ul class="m-0 flex flex-wrap gap-x-4 gap-y-2 p-0 text-[0.6875rem] font-semibold text-[#67756c]">
+              <li class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-verde"></span>Buracos</li>
+              <li class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-[#3d8068]"></span>Iluminação</li>
+              <li class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-[#6f9a8b]"></span>Lixo</li>
+              <li class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-[#8aa99c]"></span>Calçadas</li>
+            </ul>
+          </div>
+          <p data-mapa-status class="m-0 text-[0.6875rem] text-[#9aa49e]" aria-live="polite"></p>
+        </div>
+      </div>
     </div>
-  </div>
-
-  <div class="home-mapa__acoes flex flex-wrap items-center gap-x-3 gap-y-2">
-    <button type="button" class="home-mapa__localizacao inline-flex min-h-11 items-center gap-2 rounded-botao border border-borda bg-white px-3.5 py-2.5 text-xs font-extrabold text-verde transition hover:bg-salvia/50" data-mapa-localizacao>
-      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <circle cx="12" cy="12" r="3" />
-        <path d="M12 2v3m0 14v3M2 12h3m14 0h3" />
-      </svg>
-      Minha localização
-    </button>
-    <p class="home-mapa__nota m-0 min-w-0 flex-1 basis-56 text-[0.8125rem] leading-[1.45] text-[#67756c]" data-mapa-status aria-live="polite">
-      A localização é opcional; o mapa funciona sem ela.
-    </p>
   </div>
 
   {{ mapa_config|json_script:"home-mapa-config" }}

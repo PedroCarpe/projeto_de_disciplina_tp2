@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Registrar ocorrência — Nossa Rua{% endblock %}
 
@@ -74,4 +75,8 @@
     </form>
   </main>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+  <script src="{% static 'js/registrar_ocorrencia.js' %}" defer></script>
 {% endblock %}

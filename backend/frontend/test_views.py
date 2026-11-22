@@ -652,7 +652,7 @@ class RegistrarOcorrenciaTests(TestCase):
 
         for tipo in ("sinalizacao", "arvore", "esgoto", "alagamento", "vandalismo"):
             self.assertContains(resposta, f'value="{tipo}"')
-        self.assertContains(resposta, '<option value="outros">Outros</option>', 
+        self.assertContains(resposta, '<option value="outros">Outros</option>',
         html=True
         )
     def test_formulario_carrega_script_de_localizacao(self) -> None:

@@ -1,0 +1,38 @@
+<section id="mapa" class="home-mapa flex flex-col gap-3" aria-labelledby="mapa-titulo">
+  <div class="home-mapa__cabecalho flex flex-wrap items-baseline justify-between gap-2">
+    <h2 id="mapa-titulo" class="m-0 text-lg font-extrabold tracking-[-0.03em] text-tinta">Mapa de ocorrências</h2>
+    <p class="home-mapa__legenda m-0 text-[0.8125rem] text-[#67756c]">Sua região</p>
+  </div>
+
+  <div
+    id="home-mapa-canvas"
+    class="home-mapa__area relative aspect-[4/3] max-h-[19rem] min-h-[15rem] w-full overflow-hidden rounded-cartao border border-borda bg-[#f1ece2] md:max-h-[20rem]"
+    data-mapa-canvas
+    role="application"
+    aria-label="Mapa interativo de ocorrências. Use os controles de zoom para navegar."
+  >
+    <div
+      class="home-mapa__vazio pointer-events-none absolute bottom-3.5 left-3.5 right-3.5 flex max-w-sm flex-col gap-1 rounded-[1.125rem] bg-white/95 p-3 opacity-95 shadow-[0_2px_6px_rgba(38,50,59,0.12)]"
+      data-mapa-vazio
+      role="status"
+    >
+      <strong class="text-[0.9375rem]">Nenhuma ocorrência publicada ainda.</strong>
+      <p class="m-0 text-[0.8125rem] leading-[1.45] text-[#67756c]">Quando houver registros, eles aparecerão aqui com tipo, data e status.</p>
+    </div>
+  </div>
+
+  <div class="home-mapa__acoes flex flex-wrap items-center gap-x-3 gap-y-2">
+    <button type="button" class="home-mapa__localizacao inline-flex min-h-11 items-center gap-2 rounded-botao border border-borda bg-white px-3.5 py-2.5 text-xs font-extrabold text-verde transition hover:bg-salvia/50" data-mapa-localizacao>
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="3" />
+        <path d="M12 2v3m0 14v3M2 12h3m14 0h3" />
+      </svg>
+      Minha localização
+    </button>
+    <p class="home-mapa__nota m-0 min-w-0 flex-1 basis-56 text-[0.8125rem] leading-[1.45] text-[#67756c]" data-mapa-status aria-live="polite">
+      A localização é opcional; o mapa funciona sem ela.
+    </p>
+  </div>
+
+  {{ mapa_config|json_script:"home-mapa-config" }}
+</section>

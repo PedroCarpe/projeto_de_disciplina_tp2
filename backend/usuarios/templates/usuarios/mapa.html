@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Mapa — Nossa Rua{% endblock %}
+
+{% block extra_head %}
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+{% endblock %}
+
+{% block extra_scripts %}
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+    defer
+  ></script>
+  <script src="{% static 'js/home_mapa.js' %}" defer></script>
+{% endblock %}
+
+{% block content %}
+<div class="site-shell mx-auto w-full max-w-[90rem] overflow-hidden px-[6%] font-base">
+  <header class="flex min-h-[5.5rem] items-center justify-between gap-4 border-b border-borda md:min-h-[4.5rem]">
+    {% include "includes/logo.html" %}
+    <a href="{% url 'inicio' %}" class="home__link inline-flex items-center gap-2">
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M20 12H5m5-5-5 5 5 5" />
+      </svg>
+      Voltar ao início
+    </a>
+  </header>
+
+  <main class="pagina-mapa w-full max-w-none gap-0 py-0">
+    <section class="hero grid gap-2 py-8 md:py-10" aria-labelledby="mapa-titulo-pagina">
+      <div class="hero-copy max-w-2xl">
+        <p class="home__eyebrow mb-5 mt-0 inline-flex items-center gap-2 rounded-md bg-salvia/70 px-3 py-2 text-[0.625rem] font-extrabold uppercase tracking-[0.16em] text-verde-escuro">
+          <span class="h-1.5 w-1.5 rounded-full bg-verde"></span>
+          MAPA DE OCORRÊNCIAS
+        </p>
+        <h1 id="mapa-titulo-pagina" class="m-0 max-w-[36ch] text-[clamp(2rem,4vw,3rem)] font-extrabold leading-[1.16] tracking-[-0.06em] text-tinta">
+          Explore a <span class="text-verde">cidade.</span>
+        </h1>
+        <p class="mt-4 max-w-md text-sm leading-[1.85] text-[#67756c]">
+          Navegue pelo mapa e veja o que acontece perto de você.
+        </p>
+      </div>
+    </section>
+
+    <div class="mb-8 rounded-cartao bg-white p-3 shadow-[0_10px_30px_rgba(38,50,59,0.06)] md:p-4">
+      {% include "includes/home_mapa.html" %}
+    </div>
+  </main>
+
+  <footer class="mb-2 flex flex-col items-center justify-between gap-2 border-t border-borda py-6 text-[0.625rem] text-[#95a097] md:flex-row">
+    <span>Uma cidade melhor é uma construção de todos.</span>
+    <span>Nossa Rua <span class="px-1.5">·</span> Feita para participar.</span>
+  </footer>
+</div>
+{% endblock %}

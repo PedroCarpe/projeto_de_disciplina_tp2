@@ -108,3 +108,42 @@ Regras:
 - [ ] Verificador de padrão para templates (djLint?) e para JavaScript.
 - [ ] Usar Vue via CDN em alguma ilha ou ficar só com JavaScript puro.
 - [ ] Banco: SQLite com latitude/longitude ou PostGIS (afeta como o mapa recebe os dados).
+
+## 10. Estado atual das integrações
+
+**Home (`/`) é de apresentação e navegação.** Segue o layout de referência (cabeçalho, hero com
+ilustração vetorial, seção “Explore a plataforma” e rodapé), mas com a identidade verde/creme do
+projeto — nenhum azul foi adotado. Dois CTAs (“Criar conta para participar” e “Explorar mapa”) e
+três cartões (Mapa, Estatísticas, Alertas). O mapa, os links provisórios e a barra inferior foram
+removidos da home; o componente do mapa foi preservado e reutilizado na página própria.
+
+**Tailwind CSS via CDN** é carregado uma vez em `base.html` com `corePlugins: { preflight: false }`
+para não alterar as telas de login/cadastro, que continuam em `app.css`. O `tailwind.config`
+declara `creme`, `tinta`, `verde`, `verde-escuro`, `salvia`, `borda`, a fonte Nunito e os raios
+`botao`/`cartao`. A home, a página `/mapa/` e os includes `arte_urbana.html` e `home_mapa.html`
+usam utilitários (`grid`, `md:grid-cols-3`, `gap-*`, `rounded-*`, `bg-salvia/70`, `text-verde`,
+etc.); `app.css` mantém tokens, componentes compartilhados, reset e os ajustes específicos do
+Leaflet. A ilustração é SVG inline com a paleta do projeto — sem imagem externa e sem dados
+simulados.
+
+**Mapa em `/mapa/` (`name="mapa"`), público para visitantes e autenticados.** `mapa.html` carrega
+Leaflet `1.9.4` via unpkg com SRI uma única vez (`{% block extra_head %}` /
+`{% block extra_scripts %}`) e `static/js/home_mapa.js` inicializa `#home-mapa-canvas`. A região
+inicial vem de `MAPA_PADRAO` em `setup/settings.py` (`lat`, `lng`, `zoom`) e é passada como JSON
+pela view — sem depender de GPS. Zoom, arrasto e atribuição são reais. `referrerPolicy:
+"no-referrer"` e um fallback para CARTO (`light_all`) protegem contra `403` transitório do
+servidor de tiles.
+
+O botão “Minha localização” chama `getCurrentPosition` somente após o clique; permissão negada
+ou dispositivo sem GPS apenas atualiza o status, sem interromper o mapa. A mensagem “Nenhuma
+ocorrência publicada ainda.” aparece discreta sobre o mapa e não bloqueia a interação.
+
+Não existe ainda modelo, API ou endpoint de ocorrências, estatísticas, alertas ou perfil — e
+nenhum foi criado. `configuracao_mapa()` entrega `"ocorrencias": []` e o JS expõe
+`window.NossaRua.mapaHome.atualizarOcorrencias(lista)`, pronta para o contrato futuro com
+`latitude`, `longitude`, `tipo`, `data` e `status`. Nenhum dado é inventado para preencher o mapa.
+Chart.js continua apenas proposta. Os cartões Estatísticas e Alertas usam `disabled` nativo e,
+no autenticado, o CTA “Registrar ocorrência” também. Rotas futuras como `estatisticas` e
+`alertas` só devem ser referenciadas por `{% url %}` depois de existirem no `urls.py`, para
+evitar `NoReverseMatch`. O logout, por outro lado, já é real: usa `LogoutView` por POST em
+`/sair/` e retorna para `/`.

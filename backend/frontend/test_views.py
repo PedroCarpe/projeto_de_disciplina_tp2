@@ -644,3 +644,12 @@ class RegistrarOcorrenciaTests(TestCase):
         self.assertContains(resposta, f'href="{reverse("inicio")}"')
         for tipo in ("buraco", "iluminacao", "lixo", "calcada", "outros"):
             self.assertContains(resposta, f'value="{tipo}"')
+
+    def test_formulario_oferece_tipos_ampliados(self) -> None:
+        self.client.force_login(self.usuario)
+
+        resposta = self.client.get(reverse("registrar_ocorrencia"))
+
+        for tipo in ("sinalizacao", "arvore", "esgoto", "alagamento", "vandalismo"):
+            self.assertContains(resposta, f'value="{tipo}"')
+        self.assertContains(resposta, '<option value="outros">Outros</option>', html=True)

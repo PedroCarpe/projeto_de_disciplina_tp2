@@ -3,20 +3,77 @@
 {% block title %}Registrar ocorrência — Nossa Rua{% endblock %}
 
 {% block content %}
-<main>
-  <h1>Registrar ocorrência</h1>
-  <form method="post">
-    {% csrf_token %}
-    <label for="tipo">Tipo de ocorrência</label>
-    <select id="tipo" name="tipo" required></select>
+<div class="site-shell mx-auto w-full max-w-[90rem] px-[6%] font-base">
+  <header class="flex min-h-[5.5rem] items-center justify-between gap-4 border-b border-borda md:min-h-[4.5rem]">
+    {% include "includes/logo.html" %}
+    <a href="{% url 'inicio' %}" class="home__link inline-flex items-center gap-2">
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M20 12H5m5-5-5 5 5 5" />
+      </svg>
+      Voltar ao início
+    </a>
+  </header>
 
-    <label for="descricao">Detalhes</label>
-    <textarea id="descricao" name="descricao"></textarea>
+  <main class="mx-auto w-full max-w-xl py-9 md:py-11">
+    <p class="home__eyebrow mb-6 mt-0 inline-flex items-center gap-2 rounded-full bg-salvia px-3.5 py-1.5 text-[0.6875rem] font-extrabold uppercase tracking-[0.08em] text-verde-escuro">
+      <span class="h-1.5 w-1.5 rounded-full bg-verde"></span>
+      NOVA OCORRÊNCIA
+    </p>
+    <h1 class="m-0 text-[clamp(2rem,3vw,2.5rem)] font-extrabold leading-[1.12] tracking-[-0.04em] text-tinta">
+      Registrar <span class="text-verde">ocorrência.</span>
+    </h1>
+    <p class="mt-4 text-sm leading-[1.8] text-tinta/70">
+      Conte o que você viu. A data, a hora e o local são registrados junto.
+    </p>
 
-    <input type="hidden" name="latitude" id="latitude" />
-    <input type="hidden" name="longitude" id="longitude" />
+    <form method="post" class="formulario mt-8">
+      {% csrf_token %}
 
-    <button type="submit">Registrar</button>
-  </form>
-</main>
+      <div class="campo">
+        <label class="campo__etiqueta" for="id_tipo">Tipo de ocorrência</label>
+        <div class="campo__grupo">
+          <svg class="campo__icone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 6h16M4 12h16M4 18h10" />
+          </svg>
+          <select id="id_tipo" name="tipo" required class="campo__controle">
+            <option value="" disabled selected>Escolha o tipo</option>
+            <option value="buraco">Buraco</option>
+            <option value="iluminacao">Iluminação</option>
+            <option value="lixo">Lixo</option>
+            <option value="calcada">Calçada</option>
+            <option value="outros">Outros</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="campo">
+        <label class="campo__etiqueta" for="id_descricao">Detalhes</label>
+        <div class="campo__grupo items-start py-1">
+          <textarea id="id_descricao" name="descricao" rows="4" class="campo__controle resize-y"
+            placeholder="Ex.: buraco grande na calçada em frente ao número 120."></textarea>
+        </div>
+      </div>
+
+      <div class="campo">
+        <span class="campo__etiqueta">Localização</span>
+        <button type="button" class="botao botao--secundario" data-localizacao>
+          <span>Usar minha localização</span>
+        </button>
+        <p class="mt-2 text-xs text-tinta/70" data-localizacao-status aria-live="polite">
+          Localização ainda não capturada.
+        </p>
+        <input type="hidden" name="latitude" id="latitude" />
+        <input type="hidden" name="longitude" id="longitude" />
+      </div>
+
+      <button type="submit" class="botao botao--primario">
+        <span>Registrar ocorrência</span>
+        <svg class="botao__seta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M5 12h13" />
+          <path d="m13 6 6 6-6 6" />
+        </svg>
+      </button>
+    </form>
+  </main>
+</div>
 {% endblock %}

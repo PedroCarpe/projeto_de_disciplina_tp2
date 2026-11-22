@@ -108,3 +108,67 @@ Regras:
 - [ ] Verificador de padrão para templates (djLint?) e para JavaScript.
 - [ ] Usar Vue via CDN em alguma ilha ou ficar só com JavaScript puro.
 - [ ] Banco: SQLite com latitude/longitude ou PostGIS (afeta como o mapa recebe os dados).
+
+## 10. Estado atual das integrações
+
+**Home (`/`) é de apresentação e navegação.** Segue o layout de referência (cabeçalho, hero com
+ilustração vetorial, seção “Explore a plataforma” e rodapé), mas com a identidade verde/creme do
+projeto — nenhum azul foi adotado. Dois CTAs (“Criar conta para participar” e “Explorar mapa”) e
+três cartões (Mapa, Estatísticas, Alertas). O mapa, os links provisórios e a barra inferior foram
+removidos da home; o componente do mapa foi preservado e reutilizado na página própria.
+
+**Tailwind CSS via CDN** é carregado uma vez em `base.html` com `corePlugins: { preflight: false }`
+para não alterar as telas de login/cadastro, que continuam em `app.css`. O `tailwind.config`
+declara `creme`, `tinta`, `verde`, `verde-escuro`, `salvia`, `borda`, a fonte Nunito e os raios
+`botao`/`cartao`. A home, a página `/mapa/` e os includes `arte_urbana.html` e `home_mapa.html`
+usam utilitários (`grid`, `md:grid-cols-3`, `gap-*`, `rounded-*`, `bg-salvia/70`, `text-verde`,
+etc.); `app.css` mantém tokens, componentes compartilhados, reset e os ajustes específicos do
+Leaflet. A ilustração é SVG inline com a paleta do projeto — sem imagem externa e sem dados
+simulados.
+
+**Mapa em `/mapa/` (`name="mapa"`), público para visitantes e autenticados.** A página segue a
+composição de referência: cabeçalho com marca e “Voltar ao início”, eyebrow “MAPA DE OCORRÊNCIAS”,
+título “Explore a cidade.” (com “cidade.” em verde) e subtítulo “Navegue pelo mapa e veja as
+ocorrências registradas na sua região.”. Abaixo, um painel branco de cantos de 28 px ocupa 90% da
+largura útil e se divide em sidebar de filtros (25%) e área do mapa (75%), separadas por linha
+vertical suave; no desktop o painel mediu 1140 px, a sidebar 285 px e o mapa 855 px.
+
+A sidebar traz “Filtros”, “Limpar filtros”, os seletores “Tipo de ocorrência”, “Período” e
+“Status” e o botão verde-escuro “Aplicar filtros”. Acima do mapa ficam a busca “Buscar região,
+bairro ou endereço...” e o botão “Minha localização”. O canvas tem 520 px no desktop a partir de
+`lg` e 550 px em telas grandes (`xl`), com cantos de 20 px; no celular mede 416 px. Marcadores
+`L.divIcon` usam ícones verdes por categoria (buracos, iluminação, lixo e calçadas) e, ao selecionar
+um marcador real, abre-se um cartão à direita no desktop ou inferior no celular com categoria,
+título, local, data, status, descrição e os botões desabilitados “Ver detalhes” e “Acompanhar”.
+A legenda das categorias fica abaixo do mapa. Não há gráficos nem estatísticas nesta página.
+
+`mapa.html` carrega
+Leaflet `1.9.4` via unpkg com SRI uma única vez (`{% block extra_head %}` /
+`{% block extra_scripts %}`) e `static/js/home_mapa.js` inicializa `#home-mapa-canvas`. A região
+inicial vem de `MAPA_PADRAO` em `setup/settings.py` (`lat`, `lng`, `zoom`) e é passada como JSON
+pela view — sem depender de GPS. Zoom, arrasto e atribuição são reais. Os tiles usam o endpoint
+recomendado `tile.openstreetmap.org` (sem subdomínios) como provedor principal e **não** definem
+`referrerPolicy`, para que o navegador envie o `Referer` exigido pela política de uso do
+OpenStreetMap — `base.html` também declara
+`<meta name="referrer" content="strict-origin-when-cross-origin">` para deixar isso explícito. O
+CARTO (`light_all`) voltou a atuar apenas em falha técnica (`tileerror`): um bloqueio por política
+que responde `200` com imagem de aviso dispara `tileload`, não `tileerror`, e não se resolve trocando
+de provedor.
+
+O botão “Minha localização” chama `getCurrentPosition` somente após o clique; permissão negada
+ou dispositivo sem GPS apenas atualiza o status, sem interromper o mapa. A mensagem “Nenhuma
+ocorrência publicada ainda.” aparece discreta sobre o mapa e não bloqueia a interação; quando
+existem dados mas os filtros não retornam nada, o texto muda para “Nenhuma ocorrência com esses
+filtros.”.
+
+Não existe ainda modelo, API ou endpoint de ocorrências, estatísticas, alertas ou perfil — e
+nenhum foi criado. `configuracao_mapa()` entrega `"ocorrencias": []` e o JS expõe
+`window.NossaRua.mapaHome.atualizarOcorrencias(lista)` e `aplicarFiltros()`, prontas para o
+contrato futuro com `latitude`, `longitude`, `tipo`, `data` e `status` (mais `bairro`, `endereço`,
+`categoria` e `descrição` opcionais). Busca, filtros, contagem e cartão de detalhes funcionam sobre
+essa lista; nenhum dado é inventado para preencher o mapa.
+Chart.js continua apenas proposta. Os cartões Estatísticas e Alertas usam `disabled` nativo e,
+no autenticado, o CTA “Registrar ocorrência” também. Rotas futuras como `estatisticas` e
+`alertas` só devem ser referenciadas por `{% url %}` depois de existirem no `urls.py`, para
+evitar `NoReverseMatch`. O logout, por outro lado, já é real: usa `LogoutView` por POST em
+`/sair/` e retorna para `/`.

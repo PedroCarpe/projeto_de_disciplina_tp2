@@ -5,6 +5,11 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 
 
+def home_view(request: HttpRequest) -> HttpResponse:
+    """Renderiza a página inicial pública do Nossa Rua."""
+    return render(request, "usuarios/inicio.html")
+
+
 def login_view(request: HttpRequest) -> HttpResponse:
     """Renderiza a tela de login (apresentação, sem autenticação ainda)."""
     return render(request, "usuarios/login.html")

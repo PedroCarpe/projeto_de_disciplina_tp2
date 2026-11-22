@@ -37,11 +37,9 @@
           </svg>
           <select id="id_tipo" name="tipo" required class="campo__controle">
             <option value="" disabled selected>Escolha o tipo</option>
-            <option value="buraco">Buraco</option>
-            <option value="iluminacao">Iluminação</option>
-            <option value="lixo">Lixo</option>
-            <option value="calcada">Calçada</option>
-            <option value="outros">Outros</option>
+            {% for valor, rotulo in tipos %}
+              <option value="{{ valor }}">{{ rotulo }}</option>
+            {% endfor %}
           </select>
         </div>
       </div>

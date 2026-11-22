@@ -652,4 +652,6 @@ class RegistrarOcorrenciaTests(TestCase):
 
         for tipo in ("sinalizacao", "arvore", "esgoto", "alagamento", "vandalismo"):
             self.assertContains(resposta, f'value="{tipo}"')
-        self.assertContains(resposta, '<option value="outros">Outros</option>', html=True)
+        self.assertContains(resposta, '<option value="outros">Outros</option>', 
+        html=True
+        )

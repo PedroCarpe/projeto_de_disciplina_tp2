@@ -1,13 +1,40 @@
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 
+MAPA_PADRAO_FALLBACK = {"lat": -23.5505, "lng": -46.6333, "zoom": 13}
+
+
+def configuracao_mapa() -> dict:
+    """Devolve a configuração pública do mapa, sem dados de ocorrências."""
+    padrao = getattr(settings, "MAPA_PADRAO", None) or MAPA_PADRAO_FALLBACK
+    return {
+        "centro": {
+            "lat": float(padrao.get("lat", MAPA_PADRAO_FALLBACK["lat"])),
+            "lng": float(padrao.get("lng", MAPA_PADRAO_FALLBACK["lng"])),
+        },
+        "zoom": int(padrao.get("zoom", MAPA_PADRAO_FALLBACK["zoom"])),
+        "minZoom": 4,
+        "maxZoom": 19,
+        "ocorrencias": [],
+    }
+
 
 def home_view(request: HttpRequest) -> HttpResponse:
-    """Renderiza a página inicial pública do Nossa Rua."""
-    return render(request, "usuarios/inicio.html")
+    """Renderiza a home, personalizada para usuários autenticados."""
+    saudacao = ""
+    if request.user.is_authenticated:
+        nome = request.user.first_name.strip() or request.user.get_username()
+        saudacao = f"Olá, {nome}"
+    return render(request, "usuarios/inicio.html", {"saudacao": saudacao})
+
+
+def mapa_view(request: HttpRequest) -> HttpResponse:
+    """Renderiza o mapa interativo em página própria, pública para visitantes."""
+    return render(request, "usuarios/mapa.html", {"mapa_config": configuracao_mapa()})
 
 
 def login_view(request: HttpRequest) -> HttpResponse:

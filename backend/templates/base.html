@@ -4,6 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#FBF8F3" />
+    <!-- Política explícita: envia a origem nas requisições de tiles (OSM/CARTO). -->
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
     <title>{% block title %}Nossa Rua{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -11,10 +13,37 @@
       href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <!-- Identidade visual única: backend/static/css/app.css -->
+    <!-- Identidade visual: Tailwind (CDN) + tokens/componentes em app.css -->
     <link rel="stylesheet" href="{% static 'css/app.css' %}" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        corePlugins: { preflight: false },
+        theme: {
+          extend: {
+            colors: {
+              creme: "#fbf8f3",
+              tinta: "#26323b",
+              verde: "#2f6b55",
+              "verde-escuro": "#1f5240",
+              salvia: "#d5ebdf",
+              borda: "#ede6db",
+            },
+            fontFamily: {
+              base: ["Nunito", "system-ui", "sans-serif"],
+            },
+            borderRadius: {
+              botao: "1rem",
+              cartao: "1.375rem",
+            },
+          },
+        },
+      };
+    </script>
+    {% block extra_head %}{% endblock %}
   </head>
   <body>
     {% block content %}{% endblock %}
+    {% block extra_scripts %}{% endblock %}
   </body>
 </html>

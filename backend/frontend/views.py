@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 
 MAPA_PADRAO_FALLBACK = {"lat": -23.5505, "lng": -46.6333, "zoom": 13}
 
@@ -112,3 +113,8 @@ def cadastro_view(request: HttpRequest) -> HttpResponse:
         "sucesso": sucesso,
     }
     return render(request, "usuarios/cadastro.html", contexto)
+
+@login_required
+def registrar_ocorrencia_view(request: HttpRequest) -> HttpResponse:
+    """Renderiza o formulário de registro de ocorrência."""
+    return render(request, "usuarios/registrar_ocorrencia.html")

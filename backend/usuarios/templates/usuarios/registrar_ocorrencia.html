@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Registrar ocorrência — Nossa Rua{% endblock %}
+
+{% block content %}
+<main>
+  <h1>Registrar ocorrência</h1>
+  <form method="post">
+    {% csrf_token %}
+    <label for="tipo">Tipo de ocorrência</label>
+    <select id="tipo" name="tipo" required></select>
+
+    <label for="descricao">Detalhes</label>
+    <textarea id="descricao" name="descricao"></textarea>
+
+    <input type="hidden" name="latitude" id="latitude" />
+    <input type="hidden" name="longitude" id="longitude" />
+
+    <button type="submit">Registrar</button>
+  </form>
+</main>
+{% endblock %}

@@ -655,3 +655,42 @@ class RegistrarOcorrenciaTests(TestCase):
         self.assertContains(resposta, '<option value="outros">Outros</option>', 
         html=True
         )
+    def test_formulario_carrega_script_de_localizacao(self) -> None:
+        self.client.force_login(self.usuario)
+
+        resposta = self.client.get(reverse("registrar_ocorrencia"))
+
+        self.assertContains(resposta, "js/registrar_ocorrencia.js", count=1)
+
+class RegistrarOcorrenciaJsTests(SimpleTestCase):
+    caminho_js = (
+        Path(__file__).resolve().parents[1]
+        / "static"
+        / "js"
+        / "registrar_ocorrencia.js"
+    )
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        cls.js = cls.caminho_js.read_text(encoding="utf-8")
+
+    def test_localizacao_pedida_apenas_no_clique(self) -> None:
+        self.assertIn('addEventListener("click"', self.js)
+        self.assertIn("getCurrentPosition", self.js)
+        self.assertNotIn("getCurrentPosition()", self.js)
+
+    def test_usa_alta_precisao(self) -> None:
+        self.assertIn("enableHighAccuracy: true", self.js)
+
+    def test_preenche_latitude_e_longitude(self) -> None:
+        self.assertIn('getElementById("latitude")', self.js)
+        self.assertIn('getElementById("longitude")', self.js)
+
+    def test_trata_erros_de_localizacao(self) -> None:
+        self.assertIn("function onErro", self.js)
+        self.assertIn("erro.code", self.js)
+
+    def test_impede_envio_sem_localizacao(self) -> None:
+        self.assertIn('addEventListener("submit"', self.js)
+        self.assertIn("preventDefault", self.js)

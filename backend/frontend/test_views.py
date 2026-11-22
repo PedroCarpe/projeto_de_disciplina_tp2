@@ -632,3 +632,15 @@ class RegistrarOcorrenciaTests(TestCase):
         self.assertContains(resposta, "Registrar ocorrência")
         for campo in ("tipo", "descricao", "latitude", "longitude"):
             self.assertContains(resposta, f'name="{campo}"')
+
+    def test_formulario_usa_componentes_do_design_system(self) -> None:
+        self.client.force_login(self.usuario)
+
+        resposta = self.client.get(reverse("registrar_ocorrencia"))
+
+        self.assertTemplateUsed(resposta, "includes/logo.html")
+        for classe in ("formulario", "campo__controle", "botao botao--primario"):
+            self.assertContains(resposta, f'class="{classe}')
+        self.assertContains(resposta, f'href="{reverse("inicio")}"')
+        for tipo in ("buraco", "iluminacao", "lixo", "calcada", "outros"):
+            self.assertContains(resposta, f'value="{tipo}"')

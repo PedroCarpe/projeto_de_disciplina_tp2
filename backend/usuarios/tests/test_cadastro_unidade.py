@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-from frontend.views import validar_cadastro
+from frontend.views import criar_usuario, validar_cadastro
 
 
 class ValidarCadastroTests(TestCase):
@@ -77,3 +77,33 @@ class ValidarCadastroTests(TestCase):
         )
 
         self.assertEqual(erros, {"confirmacao_senha": "As senhas não coincidem."})
+
+
+class CriarUsuarioTests(TestCase):
+    def test_cria_usuario_com_nome_composto_e_senha_com_hash(self) -> None:
+        resultado = criar_usuario(
+            nome="Maria Silva Santos",
+            email="maria@exemplo.com",
+            senha="senhaSegura123",
+        )
+
+        usuario = User.objects.get(username="maria@exemplo.com")
+        self.assertIsNone(resultado)
+        self.assertEqual(usuario.email, "maria@exemplo.com")
+        self.assertEqual(usuario.first_name, "Maria")
+        self.assertEqual(usuario.last_name, "Silva Santos")
+        self.assertTrue(usuario.check_password("senhaSegura123"))
+        self.assertNotEqual(usuario.password, "senhaSegura123")
+
+    def test_cria_usuario_com_sobrenome_vazio_quando_nome_tem_uma_palavra(
+        self,
+    ) -> None:
+        criar_usuario(
+            nome="Maria",
+            email="maria@exemplo.com",
+            senha="senhaSegura123",
+        )
+
+        usuario = User.objects.get(username="maria@exemplo.com")
+        self.assertEqual(usuario.first_name, "Maria")
+        self.assertEqual(usuario.last_name, "")

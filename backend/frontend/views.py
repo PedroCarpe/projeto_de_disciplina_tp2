@@ -1,9 +1,10 @@
 from django.conf import settings
+from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 
 MAPA_PADRAO_FALLBACK = {"lat": -23.5505, "lng": -46.6333, "zoom": 13}
 
@@ -38,8 +39,23 @@ def mapa_view(request: HttpRequest) -> HttpResponse:
 
 
 def login_view(request: HttpRequest) -> HttpResponse:
-    """Renderiza a tela de login (apresentação, sem autenticação ainda)."""
-    return render(request, "usuarios/login.html")
+    """Autentica o usuário e renderiza a tela em caso de falha."""
+    if request.method != "POST":
+        return render(request, "usuarios/login.html")
+
+    email = (request.POST.get("email") or "").strip()
+    senha = request.POST.get("senha") or ""
+    usuario = authenticate(request, username=email, password=senha)
+
+    if usuario is not None:
+        login(request, usuario)
+        return redirect("inicio")
+
+    return render(
+        request,
+        "usuarios/login.html",
+        {"erro": "E-mail ou senha inválidos."},
+    )
 
 
 def validar_cadastro(

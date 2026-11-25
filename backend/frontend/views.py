@@ -128,3 +128,17 @@ def cadastro_view(request: HttpRequest) -> HttpResponse:
         "sucesso": sucesso,
     }
     return render(request, "usuarios/cadastro.html", contexto)
+
+def estatisticas_view(request: HttpRequest) -> HttpResponse:
+    """Renderiza a tela de estatísticas com filtros de período e região."""
+    data_inicio = request.GET.get("data_inicio", "")
+    data_fim = request.GET.get("data_fim", "")
+    erro = ""
+    # Datas no formato AAAA-MM-DD (input type="date") comparam certo como texto.
+    if data_inicio and data_fim and data_inicio > data_fim:
+        erro = "A data inicial deve ser anterior à final."
+    return render(
+        request,
+        "usuarios/estatisticas.html",
+        {"erro": erro, "filtros": request.GET},
+    )

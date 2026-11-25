@@ -642,3 +642,30 @@ class CadastroViewTests(TestCase):
         self.assertEqual(resposta.status_code, 200)
         self.assertContains(resposta, "Este e-mail já está cadastrado.")
         self.assertEqual(User.objects.count(), 1)
+
+class EstatisticasViewTests(TestCase):
+    def test_estatisticas_e_publica_e_usa_template(self) -> None:
+        resposta = self.client.get(reverse("estatisticas"))
+
+        self.assertEqual(resposta.status_code, 200)
+        self.assertTemplateUsed(resposta, "usuarios/estatisticas.html")
+
+    def test_estatisticas_tem_filtros_de_periodo_e_regiao(self) -> None:
+        resposta = self.client.get(reverse("estatisticas"))
+
+        self.assertContains(resposta, 'name="data_inicio"')
+        self.assertContains(resposta, 'name="data_fim"')
+        self.assertContains(resposta, 'name="regiao"')
+
+    def test_sem_ocorrencias_mostra_aviso(self) -> None:
+        resposta = self.client.get(reverse("estatisticas"))
+
+        self.assertContains(resposta, "Nenhuma ocorrência registrada no período.")
+
+    def test_periodo_invertido_mostra_erro(self) -> None:
+        resposta = self.client.get(
+            reverse("estatisticas"),
+            {"data_inicio": "2026-11-30", "data_fim": "2026-11-01"},
+        )
+
+        self.assertContains(resposta, "A data inicial deve ser anterior à final.")

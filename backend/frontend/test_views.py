@@ -460,14 +460,50 @@ class LoginViewTests(TestCase):
         self.assertContains(resposta, 'type="password"')
         self.assertContains(resposta, 'autocomplete="current-password"')
 
-    def test_login_nao_autentica_apenas_renderiza(self) -> None:
+    def test_login_com_credenciais_validas_autentica_e_redireciona(self) -> None:
+        email = "maria@exemplo.com"
+        senha = "senhaSegura123"
+        User.objects.create_user(
+            username=email,
+            email=email,
+            password=senha,
+        )
+
         resposta = self.client.post(
             reverse("login"),
-            {"email": "maria@exemplo.com", "senha": "senhaSegura123"},
+            {"email": email, "senha": senha},
+        )
+
+        self.assertRedirects(resposta, reverse("inicio"))
+        self.assertIn("_auth_user_id", self.client.session)
+
+    def test_login_com_senha_incorreta_nao_autentica(self) -> None:
+        email = "maria@exemplo.com"
+        User.objects.create_user(
+            username=email,
+            email=email,
+            password="senhaSegura123",
+        )
+
+        resposta = self.client.post(
+            reverse("login"),
+            {"email": email, "senha": "senhaErrada123"},
         )
 
         self.assertEqual(resposta.status_code, 200)
         self.assertTemplateUsed(resposta, "usuarios/login.html")
+        self.assertContains(resposta, "E-mail ou senha inválidos.")
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+    def test_login_com_email_inexistente_nao_autentica(self) -> None:
+        resposta = self.client.post(
+            reverse("login"),
+            {"email": "inexistente@exemplo.com", "senha": "senhaSegura123"},
+        )
+
+        self.assertEqual(resposta.status_code, 200)
+        self.assertTemplateUsed(resposta, "usuarios/login.html")
+        self.assertContains(resposta, "E-mail ou senha inválidos.")
         self.assertNotIn("_auth_user_id", self.client.session)
 
     def test_login_alternador_aponta_para_cadastro(self) -> None:

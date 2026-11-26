@@ -172,32 +172,3 @@ no autenticado, o CTA “Registrar ocorrência” também. Rotas futuras como `e
 `alertas` só devem ser referenciadas por `{% url %}` depois de existirem no `urls.py`, para
 evitar `NoReverseMatch`. O logout, por outro lado, já é real: usa `LogoutView` por POST em
 `/sair/` e retorna para `/`.
-
-## Central de notificações
-
-A página `/notificacoes/` (`name="notificacoes"`) vive no app `usuarios` e protege o acesso com
-`@login_required(login_url="login")`: visitante é encaminhado ao login com `next`; qualquer
-usuário autenticado entra, sem exigir `is_staff`. A view `notificacoes_view` está em
-`usuarios/views.py`, a rota foi registrada no `frontend/urls.py` existente e a view apenas faz
-`render` de `usuarios/notificacoes.html`, sem contexto extra, modelo ou persistência.
-
-A tela reúne três abas na mesma URL, alternadas por `static/js/notificacoes.js` (JavaScript
-puro, com ARIA e navegação por teclado):
-
-- **Notificações**: estado vazio “Você ainda não recebeu nenhuma notificação” e explicação de
-  que as atualizações das ocorrências acompanhadas aparecerão nessa área;
-- **Favoritos**: estado vazio “Nenhuma ocorrência favoritada”, explicação do acompanhamento e
-  link real para o mapa existente (`{% url 'mapa' %}`);
-- **Preferências**: estado vazio enquanto não há integração, sem formulário, com o botão
-  **Salvar preferências** desabilitado.
-
-O cartão **Alertas** da home deixou de ser desabilitado e passou a ser um link real para a nova
-rota. O cartão **Estatísticas** continua desabilitado. Nenhum favorito, notificação, tipo de
-ocorrência, API, `fetch`, `localStorage` ou dado fictício foi criado: o conteúdo das três abas é
-somente o estado vazio aguardando o backend.
-
-Nenhum modelo, migration, banco, autenticação, painel administrativo, mapa ou home foi reformulado.
-As alterações fora do app `usuarios` se resumem à rota em `frontend/urls.py`, ao cartão **Alertas**
-em `usuarios/templates/usuarios/inicio.html` e ao JavaScript em `static/js/notificacoes.js`.
-A primeira versão desta tela chegou a usar um app `notificacoes` independente; a organização foi
-simplificada a pedido e o app foi removido, sem deixar registro em `INSTALLED_APPS` ou `setup/urls.py`.

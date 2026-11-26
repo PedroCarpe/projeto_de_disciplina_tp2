@@ -256,6 +256,14 @@ body {
   padding: 3rem 1.25rem 2rem;
 }
 
+.acesso__visitante {
+  display: block;
+  margin-bottom: 1.25rem;
+  color: var(--verde);
+  font-size: 0.8125rem;
+  text-align: right;
+}
+
 .etiqueta {
   display: flex;
   align-items: center;
@@ -917,6 +925,10 @@ a.home-cartao:focus-visible {
 
   .acesso__conteudo {
     padding-block: 0.75rem 0.5rem;
+  }
+
+  .acesso__visitante {
+    margin-bottom: 1rem;
   }
 
   .formulario {

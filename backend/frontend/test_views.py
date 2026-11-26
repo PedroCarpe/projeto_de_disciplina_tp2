@@ -92,7 +92,7 @@ class HomeVisitanteTests(TestCase):
     def test_botoes_indisponiveis_do_visitante_sao_explicitos(self) -> None:
         conteudo = self.client.get(reverse("inicio")).content.decode()
 
-        self.assertEqual(conteudo.count('disabled aria-disabled="true"'), 1)
+        self.assertEqual(conteudo.count('disabled aria-disabled="true"'), 2)
         self.assertNotIn('class="home-nav"', conteudo)
         self.assertNotIn('class="home-nav__item"', conteudo)
 
@@ -144,7 +144,7 @@ class HomeAutenticadoTests(TestCase):
     def test_botoes_indisponiveis_do_autenticado_sao_explicitos(self) -> None:
         conteudo = self.client.get(reverse("inicio")).content.decode()
 
-        self.assertEqual(conteudo.count('disabled aria-disabled="true"'), 2)
+        self.assertEqual(conteudo.count('disabled aria-disabled="true"'), 3)
 
     def test_autenticado_nao_ve_links_de_login_e_cadastro(self) -> None:
         resposta = self.client.get(reverse("inicio"))
@@ -163,31 +163,6 @@ class HomeAutenticadoTests(TestCase):
         self.assertRedirects(resposta, reverse("inicio"))
         self.assertNotIn("_auth_user_id", self.client.session)
         self.assertContains(self.client.get(reverse("inicio")), "Entrar")
-
-
-class HomeAlertasTests(TestCase):
-    def test_cartao_alertas_aponta_para_notificacoes(self) -> None:
-        conteudo = self.client.get(reverse("inicio")).content.decode()
-
-        cartao = re.search(
-            rf'<a[^>]*href="{reverse("notificacoes")}"[^>]*home-cartao[^>]*>',
-            conteudo,
-        )
-        self.assertIsNotNone(cartao)
-        self.assertNotIn("disabled", cartao.group(0))
-
-    def test_cartao_alertas_continua_disponivel_para_autenticado(self) -> None:
-        usuario = User.objects.create_user(
-            username="comum@exemplo.com",
-            email="comum@exemplo.com",
-            password="senha123",
-        )
-        self.client.force_login(usuario)
-
-        resposta = self.client.get(reverse("inicio"))
-
-        self.assertContains(resposta, f'href="{reverse("notificacoes")}"')
-        self.assertContains(resposta, "Alertas")
 
 
 class MapaViewTests(TestCase):
@@ -416,8 +391,8 @@ class LoginViewTests(TestCase):
         self.assertContains(response, "Nossa Rua")
         self.assertContains(response, "Nossa rua, cuidada por todos.")
         self.assertContains(response, "Registre, acompanhe e faça parte.")
-        self.assertNotContains(response, "Ver mapa de ocorrências")
-        self.assertNotContains(response, f'href="{reverse("mapa")}"')
+        self.assertContains(response, "Ver mapa de ocorrências")
+        self.assertContains(response, f'href="{reverse("mapa")}"')
         self.assertContains(response, "Acesso ao sistema")
         self.assertContains(response, "Bom ter você de volta.")
         self.assertContains(response, "Entre para acompanhar o que importa para você.")

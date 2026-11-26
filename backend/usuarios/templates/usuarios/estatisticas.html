@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Estatísticas — Nossa Rua{% endblock %}
 
@@ -60,9 +61,33 @@
       </button>
     </form>
 
-    <section class="mt-10" aria-live="polite">
-      <p class="text-sm text-tinta/70">Nenhuma ocorrência registrada no período.</p>
+    <section class="mt-10 grid gap-8" aria-live="polite">
+      <p class="m-0 text-sm text-tinta/70">
+        Total de ocorrências: <strong class="text-tinta" data-total>{{ dados.total }}</strong>
+      </p>
+
+      {% if dados.total == 0 %}
+        <p class="m-0 text-sm text-tinta/70">Nenhuma ocorrência registrada no período.</p>
+      {% endif %}
+
+      <figure class="m-0">
+        <figcaption class="campo__etiqueta">Ocorrências por tipo</figcaption>
+        <canvas data-grafico="tipo" role="img" aria-label="Gráfico de ocorrências por tipo"></canvas>
+      </figure>
+
+      <figure class="m-0">
+        <figcaption class="campo__etiqueta">Evolução ao longo do tempo</figcaption>
+        <canvas data-grafico="tempo" role="img" aria-label="Gráfico de ocorrências ao longo do tempo"></canvas>
+      </figure>
     </section>
+
+    {{ dados|json_script:"estatisticas-dados" }}
+
   </main>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+  <script src="{% static 'js/estatisticas.js' %}" defer></script>
 {% endblock %}

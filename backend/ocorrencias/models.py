@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.gis.db import models
 
 
@@ -16,6 +17,11 @@ class Ocorrencia(models.Model):
         OUTROS = 'outros', 'Outros'
 
     tipo = models.CharField(max_length=30, choices=Tipo.choices)
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name='ocorrencias',
+    )
     descricao = models.TextField(blank=True)
     localizacao = models.PointField(srid=4326, null=True, blank=True)
     criada_em = models.DateTimeField(auto_now_add=True)

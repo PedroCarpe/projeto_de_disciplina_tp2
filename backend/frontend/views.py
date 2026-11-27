@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.contrib.auth import authenticate, login
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
@@ -8,21 +7,6 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 
 MAPA_PADRAO_FALLBACK = {"lat": -23.5505, "lng": -46.6333, "zoom": 13}
-
-# Fonte única dos tipos até o backend criar o cadastro pelo admin.
-TIPOS_OCORRENCIA = [
-    ("buraco", "Buraco na via"),
-    ("calcada", "Calçada danificada"),
-    ("iluminacao", "Iluminação pública"),
-    ("lixo", "Lixo ou entulho"),
-    ("sinalizacao", "Sinalização ou semáforo"),
-    ("arvore", "Árvore (poda ou queda)"),
-    ("esgoto", "Esgoto ou vazamento"),
-    ("alagamento", "Alagamento"),
-    ("vandalismo", "Pichação ou vandalismo"),
-    ("furto", "Roubo ou furto"),
-    ("outros", "Outros"),
-]
 
 
 def configuracao_mapa() -> dict:
@@ -144,12 +128,3 @@ def cadastro_view(request: HttpRequest) -> HttpResponse:
         "sucesso": sucesso,
     }
     return render(request, "usuarios/cadastro.html", contexto)
-
-@login_required
-def registrar_ocorrencia_view(request: HttpRequest) -> HttpResponse:
-    """Renderiza o formulário de registro de ocorrência."""
-    return render(
-        request,
-        "usuarios/registrar_ocorrencia.html",
-        {"tipos": TIPOS_OCORRENCIA},
-    )

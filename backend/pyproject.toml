@@ -19,6 +19,9 @@ ignore = []
 "usuarios/models.py" = ["F401"]
 "usuarios/tests.py" = ["F401"]
 "usuarios/views.py" = ["F401"]
+"ocorrencias/admin.py" = ["F401"]
+"ocorrencias/models.py" = ["F401"]
+"ocorrencias/views.py" = ["F401"]
 
 [tool.mypy]
 python_version = "3.10"  # 👈 Mypy valida assumindo o Python 3.10 como base

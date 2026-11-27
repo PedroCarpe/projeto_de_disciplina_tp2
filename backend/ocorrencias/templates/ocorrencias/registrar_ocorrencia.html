@@ -27,6 +27,20 @@
       Conte o que você viu. A data, a hora e o local são registrados junto.
     </p>
 
+    {% if messages %}
+      {% for mensagem in messages %}
+        <p class="mt-4 rounded-xl bg-salvia px-4 py-3 text-sm text-verde-escuro" role="status">
+          {{ mensagem }}
+        </p>
+      {% endfor %}
+    {% endif %}
+
+    {% if formulario.non_field_errors %}
+      <div class="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
+        {{ formulario.non_field_errors }}
+      </div>
+    {% endif %}
+
     <form method="post" class="formulario mt-8">
       {% csrf_token %}
 
@@ -37,20 +51,26 @@
             <path d="M4 6h16M4 12h16M4 18h10" />
           </svg>
           <select id="id_tipo" name="tipo" required class="campo__controle">
-            <option value="" disabled selected>Escolha o tipo</option>
+            <option value="" disabled {% if not formulario.tipo.value %}selected{% endif %}>Escolha o tipo</option>
             {% for valor, rotulo in tipos %}
-              <option value="{{ valor }}">{{ rotulo }}</option>
+              <option value="{{ valor }}" {% if formulario.tipo.value == valor %}selected{% endif %}>{{ rotulo }}</option>
             {% endfor %}
           </select>
         </div>
+        {% for erro in formulario.tipo.errors %}
+          <p class="mt-1 text-xs text-red-700" role="alert">{{ erro }}</p>
+        {% endfor %}
       </div>
 
       <div class="campo">
         <label class="campo__etiqueta" for="id_descricao">Detalhes</label>
         <div class="campo__grupo items-start py-1">
           <textarea id="id_descricao" name="descricao" rows="4" class="campo__controle resize-y"
-            placeholder="Ex.: buraco grande na calçada em frente ao número 120."></textarea>
+            placeholder="Ex.: buraco grande na calçada em frente ao número 120.">{{ formulario.descricao.value|default_if_none:"" }}</textarea>
         </div>
+        {% for erro in formulario.descricao.errors %}
+          <p class="mt-1 text-xs text-red-700" role="alert">{{ erro }}</p>
+        {% endfor %}
       </div>
 
       <div class="campo">
@@ -61,8 +81,14 @@
         <p class="mt-2 text-xs text-tinta/70" data-localizacao-status aria-live="polite">
           Localização ainda não capturada.
         </p>
-        <input type="hidden" name="latitude" id="latitude" />
-        <input type="hidden" name="longitude" id="longitude" />
+        <input type="hidden" name="latitude" id="latitude" value="{{ formulario.latitude.value|default_if_none:'' }}" />
+        <input type="hidden" name="longitude" id="longitude" value="{{ formulario.longitude.value|default_if_none:'' }}" />
+        {% for erro in formulario.latitude.errors %}
+          <p class="mt-1 text-xs text-red-700" role="alert">Latitude: {{ erro }}</p>
+        {% endfor %}
+        {% for erro in formulario.longitude.errors %}
+          <p class="mt-1 text-xs text-red-700" role="alert">Longitude: {{ erro }}</p>
+        {% endfor %}
       </div>
 
       <button type="submit" class="botao botao--primario">

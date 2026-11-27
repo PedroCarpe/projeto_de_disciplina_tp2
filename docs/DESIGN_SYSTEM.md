@@ -75,4 +75,67 @@ Composição: quadrado verde arredondado com pin branco, centro verde e ponto p�
 8. Home em `/` (`name="inicio"`): apresentação e navegação, sem mapa e sem barra inferior. `home_view` usa `request.user.is_authenticated`. Visitante vê Entrar/Cadastrar, “Criar conta para participar” e “Explorar mapa”; autenticado vê saudação, “Sua cidade, mais bem cuidada.”, o CTA “Registrar ocorrência” desabilitado e logout por POST em `/sair/`. O logotipo compartilhado aponta para `/`.
 9. Mapa em `/mapa/` (`name="mapa"`), público e com Leaflet 1.9.4 + tiles do OpenStreetMap (endpoint sem subdomínios, sem `referrerPolicy` para enviar o `Referer`; fallback para CARTO após 3 `tileerror`s, só falhas técnicas) carregados uma única vez com SRI. O include `includes/home_mapa.html` concentra painel de 28 px, sidebar de filtros (25%), barra de busca, canvas, legenda e cartão de detalhes; a largura útil do painel é 90%. O canvas tem 416 px no celular, 520 px a partir de `lg` e 550 px em `xl`. Região inicial em `MAPA_PADRAO` (`setup/settings.py`); centro, zoom e limites vêm da view. “Minha localização” fica na barra superior e pede permissão só no clique; se negada, o mapa continua funcionando. No celular os filtros ficam atrás de um botão e os detalhes aparecem em cartão inferior. Categorias reais dos marcadores: buraco, iluminação, lixo, calçada e outros. Busca, filtros, contagem e marcadores atuam apenas sobre os dados enviados pelo backend — sem dados simulados. Sem gráficos ou estatísticas nesta página.
 10. A Home é mobile-first e usa Tailwind via CDN com a paleta do projeto: cabeçalho com marca e Entrar/Cadastrar, hero com eyebrow em pílula, título com palavra em verde, dois CTAs, rodapé de texto e uma ilustração vetorial de ruas em verde/creme. Abaixo, a seção “Explore a plataforma” tem kicker, título e três cartões com ícone, descrição e seta. No celular tudo empilha; a partir de `md` o hero vira duas colunas e os cartões ficam em uma linha. Não há barra inferior. Alvos de toque medem ao menos 44 px, inclusive a marca compartilhada.
-11. Recursos ainda sem backend são explícitos: `disabled` nativo nos cartões Estatísticas e Alertas; no autenticado, também no CTA “Registrar ocorrência”. Mapa e cadastro levam a rotas reais; não há `href="#"` nem ação simulada.
+11. Mapa, Estatísticas, Alertas e cadastro levam a rotas reais; não há `href="#"` nem ação simulada. Recursos ainda sem backend são explícitos: no autenticado, o CTA “Registrar ocorrência” usa `disabled` nativo.
+
+## Componentes do painel administrativo
+
+A página única `/administracao/` segue as mesmas tokens e componentes; **nenhum CSS novo**
+foi criado. Ela estende `base.html`, reaproveita `.site-shell`, `.home__link`, `.home__saudacao`,
+`.botao`, `.botao--primario`, `.home__eyebrow`, o include da marca e os utilitários Tailwind
+já declarados em `base.html`.
+
+| Grupo | Classes/atributos |
+|---|---|
+| Estrutura do painel | `.site-shell`, `.hero`, `.hero-copy`, `.home__eyebrow`, `.home__saudacao` |
+| Navegação das abas | `[role="tablist"]`, `[role="tab"]`, `[data-admin-aba]`, `aria-selected`, `aria-controls`, `tabindex` |
+| Painéis | `[role="tabpanel"]`, `[data-admin-painel]`, `aria-labelledby`, `hidden` |
+| Estados vazios | Cartões com `border-borda`, `bg-[#fdfcf9]`, `rounded-[1.25rem]` e ícone em `bg-salvia/70 text-verde` |
+| Tabelas | `min-w-[36rem]` / `min-w-[32rem]` dentro de `overflow-x-auto`, cabeçalho `bg-[#fdfcf9]` |
+| Ações indisponíveis | `disabled` nativo + `aria-disabled="true"`, sem `title` com detalhes internos |
+| Script | `static/js/admin.js`, carregado com `defer`, alternância das abas apenas por clique |
+
+Os status das ocorrências são textos — `Pendente`, `Em andamento`, `Resolvida` — apresentados
+em pílulas `bg-salvia/40` com `text-verde-escuro`. Não foram introduzidas novas cores, raios,
+sombras ou fontes. Valores ausentes em relatórios são exibidos como `—` com a legenda
+`Sem dados`, nunca como zero ou número inventado. As pendências de integração ficam registradas
+apenas nesta documentação, nunca na interface.
+
+Regras adicionais:
+
+12. O painel administrativo é protegido por `is_staff` apenas provisoriamente; a regra
+   definitiva deve vir do backend quando existirem perfis/permissões. Usuário comum recebe
+   403 e visitante é encaminhado ao login existente com `next`.
+13. `/admin/` permanece como Django Admin nativo. `/administracao/` é uma tela visual
+   separada, com abas internas e estados vazios; não substitui nem modifica o admin.
+14. Toda ação que ainda não tem backend usa `disabled` nativo. Não há link `href="#"`,
+   formulário de configuração, persistência nem dado simulado no painel.
+15. A navegação reusa classes existentes: o botão de administrador na home usa
+   `.botao--secundario.home__botao-pequeno` e aparece só com `user.is_staff`; **Sair** mantém o
+   POST real com ícone, e **Voltar ao início** no painel usa `.home__link`.
+16. As quatro abas do painel usam `role="tablist"`/`role="tab"`/`role="tabpanel"`,
+   `aria-controls`, `aria-labelledby`, `aria-selected`, `tabindex` e `hidden`. `admin.js` alterna
+   o estado apenas por clique e troca as classes visuais junto com `aria-selected`: a aba ativa
+   fica com `bg-verde-escuro`/`text-white` e as inativas com `bg-white`/`text-verde-escuro`.
+   Não há animação, storage, `fetch`, submit ou requisição ao backend.
+
+## Componentes da central de notificações
+
+A página única `/notificacoes/` segue as mesmas tokens e componentes da home e do painel:
+estende `base.html`, reaproveita `.site-shell`, `.home__link`, `.home__saudacao`, `.botao`, o
+include da marca e os utilitários Tailwind já declarados. **Nenhum CSS novo** foi criado para
+ela; a limpeza feita no login apenas removeu a regra `.acesso__visitante`, que não é mais usada.
+
+17. O acesso usa `@login_required(login_url="login")`: visitante é encaminhado ao login com
+   `next`, e qualquer usuário autenticado entra, sem exigir `is_staff`. O cabeçalho traz
+   “Voltar ao início”, o badge **Alertas** com `aria-current="page"` e o POST real de logout.
+   Os cartões **Alertas** e **Estatísticas** da home são links reais para suas rotas.
+18. As três abas (Notificações, Favoritos e Preferências) usam `role="tablist"`/`role="tab"`/
+   `role="tabpanel"`, `aria-controls`, `aria-labelledby`, `aria-selected`, `tabindex` e `hidden`.
+   `notificacoes.js` alterna o estado por clique e pelas teclas ArrowRight, ArrowLeft, Home e
+   End, trocando as classes visuais junto com `aria-selected`: a aba ativa fica com
+   `bg-verde-escuro`/`text-white` e as inativas com `bg-white`/`text-verde-escuro`. Não há
+   animação, storage, `fetch` ou submit.
+19. Os painéis reaproveitam o cartão de estado vazio com ícone em `bg-salvia/70`, textos em
+   `#67756c` e o botão desabilitado. Os textos são neutros e não citam integração, backend ou
+   etapas de desenvolvimento; as pendências ficam apenas nesta documentação. Apenas o link
+   **Explorar mapa** executa navegação real.

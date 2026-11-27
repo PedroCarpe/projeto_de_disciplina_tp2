@@ -167,8 +167,100 @@ nenhum foi criado. `configuracao_mapa()` entrega `"ocorrencias": []` e o JS exp�
 contrato futuro com `latitude`, `longitude`, `tipo`, `data` e `status` (mais `bairro`, `endereço`,
 `categoria` e `descrição` opcionais). Busca, filtros, contagem e cartão de detalhes funcionam sobre
 essa lista; nenhum dado é inventado para preencher o mapa.
-Chart.js continua apenas proposta. Os cartões Estatísticas e Alertas usam `disabled` nativo e,
-no autenticado, o CTA “Registrar ocorrência” também. Rotas futuras como `estatisticas` e
-`alertas` só devem ser referenciadas por `{% url %}` depois de existirem no `urls.py`, para
-evitar `NoReverseMatch`. O logout, por outro lado, já é real: usa `LogoutView` por POST em
-`/sair/` e retorna para `/`.
+Chart.js já é usado na página `/estatisticas/`, com `static/js/estatisticas.js`, sobre dados
+vazios até existir o app de ocorrências. Na home, os cartões Estatísticas e Alertas são links
+reais para `/estatisticas/` e `/notificacoes/`; no autenticado, o CTA “Registrar ocorrência”
+continua desabilitado. O logout é real: usa
+`LogoutView` por POST em `/sair/` e retorna para `/`.
+
+## 11. Painel administrativo (`/administracao/`)
+
+Foi acrescentada **uma única rota**, `/administracao/` (`name="administracao:painel"`), com
+quatro abas internas — não são quatro páginas:
+
+| Aba | Include | Conteúdo atual |
+|---|---|---|
+| Relatórios | `administracao/includes/relatorios.html` | Indicadores de uso do sistema com valor `—` e legenda `Sem dados`, estado vazio e exportação desabilitada |
+| Configurações | `administracao/includes/configuracoes.html` | Campos desabilitados e aviso de que nenhuma alteração pode ser feita |
+| Ocorrências | `administracao/includes/ocorrencias.html` | Status `Pendente`, `Em andamento` e `Resolvida`, tabela vazia e ação desabilitada |
+| Usuários | `administracao/includes/usuarios.html` | Tabela vazia e aviso de que nenhuma conta é alterada |
+
+A view é deliberadamente mínima: `@login_required(login_url="login")` encaminha o visitante ao
+login existente com `?next=/administracao/`; em seguida, `is_staff` provisório devolve um simples
+`HttpResponseForbidden` (HTTP 403) ao usuário comum — sem template customizado, contexto extra
+ou constantes em `views.py`. Quando houver modelo de perfis no backend, essa checagem deve ser
+substituída pela autorização definitiva. O `/admin/` nativo do Django continua intacto e não foi
+confundido com este painel. Os status provisórios são textos fixos no próprio template.
+
+`static/js/admin.js` é a única ilha nova e faz só o necessário: alterna `aria-selected`,
+`hidden` e `tabIndex` no clique da aba e troca as classes visuais da aba ativa
+(`bg-verde-escuro`/`text-white`) e das inativas (`bg-white`/`text-verde-escuro`). Não há
+navegação por teclado, API pública, `fetch`,
+`XMLHttpRequest`, `localStorage`, `sessionStorage`, `POST` nem submissão de formulário: clicar em
+“Exportar relatório”, “Salvar alterações”, “Atualizar status” ou “Bloquear usuário” não executa
+ação alguma, pois os botões usam `disabled` nativo.
+
+Na tela principal (`/`), o cabeçalho do usuário autenticado mostra o botão **Administração**
+somente quando `user.is_staff`, apontando para `{% url 'administracao:painel' %}`. Visitantes e
+usuários comuns não veem esse botão. O **Sair** continua sendo o POST real em `/sair/` — apenas
+ganhou um ícone para ficar mais visível — e o painel oferece **Voltar ao início** no cabeçalho.
+Nenhuma view, URL ou regra de autenticação foi alterada para essa navegação.
+
+Nenhum modelo, migration, dado fictício, API ou CRUD foi criado. O app `administracao` não
+registra modelos no Django Admin e sua pasta `migrations/` contém apenas `__init__.py`.
+Não foram alterados autenticação, cadastro, mapa, estatísticas, `usuarios/admin.py`,
+dependências nem configuração de banco.
+
+Responsividade: a barra de abas usa `overflow-x-auto` e alvos de toque de ao menos 44 px; os
+cartões de relatório vão de uma coluna no celular para três a partir de `sm`; os campos de
+configuração vão de uma para duas colunas a partir de `md`; as tabelas usam largura mínima com
+_contêiner_ rolável horizontalmente. Nenhum CSS novo foi necessário — apenas utilitários
+Tailwind já configurados em `base.html` e tokens de `app.css`.
+
+Verificação manual no navegador com usuário `is_staff` temporário (removido ao final):
+`/administracao/` carregou com 200, `admin.js` com 200, nenhum erro no console; o clique nas
+abas alternou o `tabpanel` e o estado ARIA corretamente. As pendências de integração ficam apenas
+nesta documentação; a interface usa textos neutros de produto.
+## 12. Central de notificações
+
+A página `/notificacoes/` (`name="notificacoes"`) vive no app `usuarios` e protege o acesso com
+`@login_required(login_url="login")`: visitante é encaminhado ao login com `next`; qualquer
+usuário autenticado entra, sem exigir `is_staff`. A view `notificacoes_view` está em
+`usuarios/views.py`, a rota foi registrada no `frontend/urls.py` existente e a view apenas faz
+`render` de `usuarios/notificacoes.html`, sem contexto extra, modelo ou persistência.
+
+A tela reúne três abas na mesma URL, alternadas por `static/js/notificacoes.js` (JavaScript
+puro, com ARIA e navegação por teclado):
+
+- **Notificações**: estado vazio “Você ainda não recebeu nenhuma notificação” e explicação de
+  que as atualizações das ocorrências acompanhadas aparecerão nessa área;
+- **Favoritos**: estado vazio “Nenhuma ocorrência favoritada”, convite para explorar o mapa e
+  link real para o mapa existente (`{% url 'mapa' %}`);
+- **Preferências**: estado vazio, sem formulário, com o botão **Salvar preferências**
+  desabilitado.
+
+Os cartões **Alertas** e **Estatísticas** da home são links reais para `/notificacoes/` e
+`/estatisticas/`. Nenhum favorito, notificação, tipo de
+ocorrência, API, `fetch`, `localStorage` ou dado fictício foi criado: o conteúdo das três abas é
+somente o estado vazio.
+
+Revisão de textos: os avisos “Integração pendente”, “Integrações pendentes”,
+“Interface visual com integrações pendentes”, “Aguardando integração” e as frases que citavam
+backend, prévia da interface ou futura integração foram removidos da interface. Os textos
+de erro, sucesso e validação foram preservados. As pendências técnicas continuam registradas
+apenas nesta documentação e em `DESIGN_SYSTEM.md`.
+
+Nenhum modelo, migration, banco, autenticação, painel administrativo, mapa, estatísticas ou home
+foi reformulado. Fora do app `usuarios`, as alterações se resumem à rota em `frontend/urls.py`,
+ao cartão **Alertas** em `usuarios/templates/usuarios/inicio.html`, ao JavaScript em
+`static/js/notificacoes.js` e à remoção do link “Ver mapa de ocorrências” de `login.html` com a
+regra CSS `.acesso__visitante`. A primeira versão desta tela chegou a usar um app `notificacoes`
+independente; a organização foi simplificada e o app removido, sem deixar registro em
+`INSTALLED_APPS` ou `setup/urls.py`.
+
+Integração sobre a `feature/frontend` atual: as estatísticas (`/estatisticas/`, view, template,
+script e testes) e a suíte original do frontend foram preservadas. Na resolução de
+`frontend/test_views.py`, as contagens de controles desabilitados da home passaram a 0 para
+visitante e 1 para autenticado, e `HomeAlertasTests` e `HomeVinculoAdministracaoTests` foram
+incorporadas. O link do login voltou a ser removido conforme esta feature. Com a tela de
+estatísticas já implementada, o cartão da home passou a redirecionar para `/estatisticas/`.

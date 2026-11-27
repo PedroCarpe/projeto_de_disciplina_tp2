@@ -1,0 +1,48 @@
+<section id="painel-relatorios" data-admin-painel="relatorios" role="tabpanel" aria-labelledby="aba-relatorios" tabindex="0">
+  <div class="flex flex-wrap items-start justify-between gap-4">
+    <div>
+      <h2 class="m-0 text-lg font-extrabold tracking-[-0.02em] text-tinta">Relatórios de uso do sistema</h2>
+      <p class="mb-0 mt-1.5 max-w-xl text-[0.8125rem] leading-relaxed text-[#67756c]">
+        Indicadores gerais de participação e atividade da plataforma.
+      </p>
+    </div>
+    <button type="button" disabled aria-disabled="true" class="inline-flex min-h-[2.75rem] items-center gap-2 rounded-xl bg-verde-escuro px-4 text-[0.75rem] font-extrabold text-white">
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 3v12m0 0 4-4m-4 4-4-4M5 17v3h14v-3" />
+      </svg>
+      Exportar relatório
+    </button>
+  </div>
+
+  <div class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
+    <article class="rounded-[1.25rem] border border-borda bg-[#fdfcf9] p-4">
+      <span class="block text-[0.625rem] font-extrabold uppercase tracking-[0.1em] text-[#879389]">Acessos</span>
+      <strong class="mt-2 block text-2xl font-extrabold text-verde-escuro">—</strong>
+      <span class="mt-1 block text-[0.6875rem] text-[#879389]">Sem dados</span>
+    </article>
+    <article class="rounded-[1.25rem] border border-borda bg-[#fdfcf9] p-4">
+      <span class="block text-[0.625rem] font-extrabold uppercase tracking-[0.1em] text-[#879389]">Ocorrências registradas</span>
+      <strong class="mt-2 block text-2xl font-extrabold text-verde-escuro">—</strong>
+      <span class="mt-1 block text-[0.6875rem] text-[#879389]">Sem dados</span>
+    </article>
+    <article class="rounded-[1.25rem] border border-borda bg-[#fdfcf9] p-4">
+      <span class="block text-[0.625rem] font-extrabold uppercase tracking-[0.1em] text-[#879389]">Usuários ativos</span>
+      <strong class="mt-2 block text-2xl font-extrabold text-verde-escuro">—</strong>
+      <span class="mt-1 block text-[0.6875rem] text-[#879389]">Sem dados</span>
+    </article>
+  </div>
+
+  <div class="mt-6 flex flex-col items-center gap-3 rounded-[1.25rem] border border-dashed border-borda bg-[#fdfcf9] px-5 py-8 text-center sm:flex-row sm:text-left">
+    <span class="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-salvia/70 text-verde">
+      <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 20V10m5 10V4m5 16v-7m5 7V8" />
+      </svg>
+    </span>
+    <div>
+      <strong class="block text-sm font-extrabold text-verde-escuro">Nenhum relatório disponível ainda.</strong>
+      <p class="mb-0 mt-1 text-[0.75rem] leading-relaxed text-[#67756c]">
+        Os dados de uso aparecerão aqui.
+      </p>
+    </div>
+  </div>
+</section>

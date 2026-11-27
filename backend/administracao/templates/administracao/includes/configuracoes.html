@@ -1,0 +1,38 @@
+<section id="painel-configuracoes" data-admin-painel="configuracoes" role="tabpanel" aria-labelledby="aba-configuracoes" tabindex="0" hidden>
+  <div class="flex flex-wrap items-start justify-between gap-4">
+    <div>
+      <h2 class="m-0 text-lg font-extrabold tracking-[-0.02em] text-tinta">Configurações gerais</h2>
+      <p class="mb-0 mt-1.5 max-w-xl text-[0.8125rem] leading-relaxed text-[#67756c]">
+        Parâmetros visuais da plataforma.
+      </p>
+    </div>
+  </div>
+
+  <div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+    <div class="flex flex-col gap-2">
+      <label for="config-cidade" class="text-[0.6875rem] font-extrabold text-[#5e6b73]">Nome da cidade</label>
+      <input id="config-cidade" type="text" disabled aria-disabled="true" class="h-11 w-full rounded-xl border border-borda bg-[#fdfcf9] px-3.5 text-[0.8125rem] text-tinta" />
+    </div>
+    <div class="flex flex-col gap-2">
+      <label for="config-regiao" class="text-[0.6875rem] font-extrabold text-[#5e6b73]">Região padrão do mapa</label>
+      <input id="config-regiao" type="text" disabled aria-disabled="true" class="h-11 w-full rounded-xl border border-borda bg-[#fdfcf9] px-3.5 text-[0.8125rem] text-tinta" />
+    </div>
+    <div class="flex flex-col gap-2">
+      <label for="config-tipos" class="text-[0.6875rem] font-extrabold text-[#5e6b73]">Tipos de ocorrência</label>
+      <input id="config-tipos" type="text" disabled aria-disabled="true" class="h-11 w-full rounded-xl border border-borda bg-[#fdfcf9] px-3.5 text-[0.8125rem] text-tinta" />
+    </div>
+    <label for="config-notificacoes" class="flex min-h-[2.75rem] items-center gap-3 rounded-xl border border-borda bg-[#fdfcf9] px-3.5">
+      <input id="config-notificacoes" type="checkbox" disabled aria-disabled="true" class="h-4 w-4" />
+      <span class="text-[0.8125rem] font-bold text-tinta">Notificações por e-mail</span>
+    </label>
+  </div>
+
+  <div class="mt-6 flex flex-col gap-3 border-t border-borda pt-5 sm:flex-row sm:items-center sm:justify-between">
+    <p class="m-0 max-w-xl text-[0.75rem] leading-relaxed text-[#67756c]">
+      Nenhuma alteração pode ser feita nesta tela.
+    </p>
+    <button type="button" disabled aria-disabled="true" class="inline-flex min-h-[2.75rem] shrink-0 items-center justify-center rounded-xl bg-verde-escuro px-4 text-[0.75rem] font-extrabold text-white">
+      Salvar alterações
+    </button>
+  </div>
+</section>

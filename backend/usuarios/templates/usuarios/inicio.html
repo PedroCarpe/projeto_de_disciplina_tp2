@@ -10,9 +10,22 @@
     {% if user.is_authenticated %}
       <div class="flex flex-wrap items-center justify-end gap-2">
         <span class="home__saudacao hidden text-xs font-extrabold text-verde-escuro sm:inline">{{ saudacao }}</span>
+        {% if user.is_staff %}
+          <a href="{% url 'administracao:painel' %}" class="botao botao--secundario home__botao-pequeno inline-flex items-center gap-2 rounded-lg border-salvia bg-salvia/40 px-4 py-2 text-xs font-bold text-verde-escuro hover:bg-salvia">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 20V10m5 10V4m5 16v-7m5 7V8" />
+            </svg>
+            Administração
+          </a>
+        {% endif %}
         <form method="post" action="{% url 'logout' %}" class="home__sair m-0">
           {% csrf_token %}
-          <button type="submit" class="home__link">Sair</button>
+          <button type="submit" class="home__link inline-flex items-center gap-2">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
+            </svg>
+            Sair
+          </button>
         </form>
       </div>
     {% else %}
@@ -47,7 +60,6 @@
             type="button"
             class="botao botao--primario home__cta mt-7 w-auto gap-3 rounded-[0.625rem] px-5 py-3 text-xs font-bold shadow-[0_4px_8px_rgba(31,82,64,0.10)] transition hover:-translate-y-0.5"
             disabled aria-disabled="true"
-            title="O registro de ocorrências ainda será integrado."
           >
             Registrar ocorrência
             <svg class="botao__seta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -119,8 +131,8 @@
           </svg>
         </a>
 
-        <button type="button" class="home-cartao flex min-h-[5.5rem] items-center gap-4 rounded-xl border border-borda bg-white p-5 text-left" disabled aria-disabled="true" title="Estatísticas disponíveis em breve.">
-          <span class="feature-icon grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#eef4f0] text-[#6f9a8b]">
+        <a href="{% url 'estatisticas' %}" class="home-cartao flex min-h-[5.5rem] items-center gap-4 rounded-xl border border-borda bg-white p-5 text-left no-underline transition hover:-translate-y-1 hover:border-[#a9c6b1] hover:shadow-[0_8px_22px_rgba(38,50,59,0.08)]">
+          <span class="feature-icon grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-salvia/70 text-verde">
             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M4 3v17h17M9 15v-4m5 4V7m5 8V4" />
             </svg>
@@ -132,10 +144,10 @@
           <svg class="feature-arrow ml-auto h-4 w-4 shrink-0 text-[#9aa89d]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M4 12h15m-5-5 5 5-5 5" />
           </svg>
-        </button>
+        </a>
 
-        <button type="button" class="home-cartao flex min-h-[5.5rem] items-center gap-4 rounded-xl border border-borda bg-white p-5 text-left" disabled aria-disabled="true" title="Alertas disponíveis em breve.">
-          <span class="feature-icon grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#f7f2e9] text-[#b29a70]">
+        <a href="{% url 'notificacoes' %}" class="home-cartao flex min-h-[5.5rem] items-center gap-4 rounded-xl border border-borda bg-white p-5 text-left no-underline transition hover:-translate-y-1 hover:border-[#a9c6b1] hover:shadow-[0_8px_22px_rgba(38,50,59,0.08)]">
+          <span class="feature-icon grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-salvia/70 text-verde">
             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4" />
               <path d="M12 2V1" />
@@ -148,7 +160,7 @@
           <svg class="feature-arrow ml-auto h-4 w-4 shrink-0 text-[#9aa89d]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M4 12h15m-5-5 5 5-5 5" />
           </svg>
-        </button>
+        </a>
       </div>
     </section>
   </main>

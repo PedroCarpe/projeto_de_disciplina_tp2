@@ -140,8 +140,7 @@
       trocandoProvedor = false;
 
       if (status) {
-        status.textContent =
-          "Mapa em provedor alternativo. A localização continua opcional.";
+        status.textContent = "O mapa foi ajustado para continuar funcionando.";
       }
     }
 

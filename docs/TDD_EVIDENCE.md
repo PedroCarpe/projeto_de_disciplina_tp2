@@ -503,3 +503,378 @@ Cada ciclo foi registrado em um commit junto com o código final: `5f405b1` (cad
 possível gerar três commits cronológicos distintos sem reconstruir artificialmente o histórico.
 Os ajustes de rigor documental deste texto são registrados em commit posterior. Os trechos acima
 são as saídas reais dos comandos executados durante o desenvolvimento.
+
+As seções seguintes são evidências **históricas da branch `feature/admin`**, preservadas porque
+documentam os ciclos reais do painel e da central de notificações. Os totais de suíte mencionados
+nelas refletem o estado daquela branch na ocasião — sem as estatísticas da `feature/frontend`.
+Os resultados da integração final estão registrados ao final deste documento.
+
+## Painel administrativo (`/administracao/`)
+
+Para a interface administrativa foi mantido o **mínimo TDD solicitado**, não um teste por
+detalhe estético. Foram escritos **17 testes** em `backend/administracao/tests/test_views.py`
+antes da criação da rota, da view, dos templates e do JavaScript. Após o GREEN, dois testes que
+verificavam detalhes de implementação (contexto da view e API pública do JavaScript) foram
+removidos, restando **15 testes** nessa etapa — o menor conjunto que ainda cobre acesso,
+estrutura das quatro abas, conteúdo visual e a natureza não persistente do script.
+
+### RED
+
+Comando executado em `backend/`:
+
+```powershell
+.\.venv\Scripts\python.exe manage.py test administracao.tests.test_views
+```
+
+Saída relevante:
+
+```text
+NoReverseMatch: 'administracao' is not a registered namespace
+FileNotFoundError: ...\backend\static\js\admin.js
+Ran 14 tests in 4.834s
+
+FAILED (errors=14)
+Found 17 test(s).
+```
+
+Os 17 testes existiam, mas os 3 testes estáticos do JS não chegaram a rodar porque o
+`setUpClass` falhou ao tentar ler `admin.js`, ainda inexistente. Os demais falharam porque
+`administracao:painel` não estava registrado no roteamento. Nenhum arquivo de produção do app
+havia sido implementado nesse momento.
+
+### GREEN
+
+Implementação mínima para atender aos testes:
+
+- `administracao` registrado em `INSTALLED_APPS` e `path("administracao/", include(...))` em
+  `setup/urls.py`, sem tocar nas rotas existentes nem no `/admin/` nativo;
+- `painel_view` com `@login_required(login_url="login")` e checagem provisória de `is_staff`,
+  devolvendo `HttpResponseForbidden` (403) ao usuário comum;
+- `painel.html` com quatro abas ARIA e os includes `relatorios.html`, `configuracoes.html`,
+  `ocorrencias.html` e `usuarios.html`, todos com estados vazios e ações desabilitadas;
+- `static/js/admin.js` apenas para alternar abas por clique, sem requisição, persistência ou
+  submissão.
+
+Saída do mesmo comando:
+
+```text
+Ran 17 tests in 4.726s
+
+OK
+Found 17 test(s).
+System check identified no issues (0 silenced).
+```
+
+### REFACTOR / simplificação máxima
+
+Com os testes verdes, a solução foi reduzida ao menor conjunto que ainda atende à base TDD:
+
+1. `assertContains` da página 403 passou a informar `status_code=403` — a página estava correta,
+   a asserção é que presumia HTTP 200.
+2. As verificações de “sem formulário” e “sem ação” foram limitadas ao painel correspondente,
+   em vez de varrer a página inteira (onde existe o formulário real de logout).
+3. O scaffold vazio `administracao/tests.py` foi removido: coexistindo com o pacote
+   `administracao/tests/`, ele quebrava a descoberta completa com
+   `ImportError: 'tests' module incorrectly imported ...`. Nenhuma lógica de produção mudou.
+4. A pedido, a solução foi enxugada: o template customizado `acesso_negado.html` foi substituído
+   por um `HttpResponseForbidden` direto; `views.py` perdeu as constantes `ABAS` e
+   `STATUS_OCORRENCIAS` e todo o contexto extra (os status agora são texto fixo no template);
+   `admin.js` ficou só com a alternância por clique, sem navegação por teclado, guarda dupla ou
+   API pública. Os dois testes que cobriam esses detalhes de implementação foram removidos,
+   chegando a 15 testes. Nenhum comportamento exigido pela base TDD foi perdido.
+
+Verificação após a simplificação:
+
+```text
+python manage.py test administracao.tests.test_views → Ran 15 tests — OK
+python manage.py test                    → Ran 72 tests — OK
+python manage.py check                   → System check identified no issues (0 silenced).
+ruff check .                             → All checks passed!
+pytest                                   → 84 passed, 38 subtests passed in 16.08s
+TOTAL (pytest-cov)                       → 692 statements, 1 miss, 99% (99.86%)
+```
+
+O comando `pytest` também executa os testes unitários de `usuarios/tests/`, por isso o total é
+maior que o do `manage.py test`. A cobertura continua acima da meta de 80% definida em
+`docs/FRONTEND.md`.
+
+Verificação manual complementar (fora do TDD): login com usuário `is_staff` temporário,
+carregamento de `/administracao/` e de `admin.js` com HTTP 200, ausência de erros no console e
+troca de abas por clique. O usuário temporário foi removido ao final.
+
+## Navegação entre a tela principal e o painel
+
+Pedido posterior: o usuário precisa de uma saída visível da tela principal e, quando for
+administrador, de um botão que leve ao painel criado. Mais uma vez o ciclo foi RED → GREEN:
+
+### RED
+
+Foram escritos 4 testes antes de tocar nos templates:
+
+- 3 em `backend/frontend/test_views.py` (`HomeVinculoAdministracaoTests`): administrador vê
+  `href="/administracao/"` e o rótulo “Administração”; usuário comum e visitante não veem;
+- 1 em `backend/administracao/tests/test_views.py`: o painel oferece “Voltar ao início”.
+
+```powershell
+.\.venv\Scripts\python.exe manage.py test administracao.tests.test_views frontend.test_views.HomeVinculoAdministracaoTests
+```
+
+```text
+FAIL: test_painel_oferece_voltar_ao_inicio_e_saida
+AssertionError: False is not true : Couldn't find 'Voltar ao início' ...
+FAIL: test_administrador_ve_botao_para_o_painel
+AssertionError: False is not true : Couldn't find 'href="/administracao/"' ...
+Ran 19 tests in 5.448s
+FAILED (failures=2)
+```
+
+### GREEN
+
+- `usuarios/inicio.html`: botão **Administração** dentro de `{% if user.is_staff %}`, usando
+  `administracao:painel`; o botão **Sair** (POST real em `/sair/`) ganhou ícone para ficar mais
+  visível, sem deixar de ser o mesmo formulário de logout;
+- `painel.html`: link **Voltar ao início** para `{% url 'inicio' %}` no cabeçalho, ao lado de
+  **Sair**. Nenhuma view, URL ou autenticação foi alterada.
+
+```text
+Ran 19 tests in 5.448s
+OK
+```
+
+### Verificação final
+
+```text
+python manage.py test administracao.tests.test_views → Ran 16 tests — OK
+python manage.py test                    → Ran 76 tests — OK
+python manage.py check                   → System check identified no issues (0 silenced).
+ruff check .                             → All checks passed!
+pytest                                   → 88 passed, 38 subtests passed in 17.29s
+TOTAL (pytest-cov)                       → 713 statements, 1 miss, 99% (99.86%)
+```
+
+Verificação manual: com usuário `is_staff` temporário, a home mostrou **Administração** e
+**Sair**; o clique em **Administração** abriu `/administracao/`; **Voltar ao início** retornou à
+home; **Sair** fez POST em `/sair/` e voltou para a home já como visitante, sem erros no console.
+O usuário temporário foi removido ao final.
+
+## Central de notificações (`/notificacoes/`)
+
+Nesta branch (`feature/notificacoes`) o ciclo foi RED → GREEN, com testes escritos antes da view,
+dos templates, da rota, do JavaScript e da alteração no cartão da home. O conjunto final tem
+**12 testes** em `backend/usuarios/tests/test_notificacoes.py` (originalmente em
+`backend/notificacoes/tests/test_views.py`, movidos na reorganização) e **2 testes** em
+`frontend.test_views.HomeAlertasTests` (a navegação); dois testes antigos da home foram ajustados
+porque **Alertas** deixou de ser desabilitado (visitante: 2 → 1; autenticado: 3 → 2).
+
+### RED (arquitetura original)
+
+O comando abaixo registra o RED real, executado quando a tela ainda usava o app independente
+`notificacoes`, removido depois na reorganização.
+
+```powershell
+.\.venv\Scripts\python.exe manage.py test notificacoes.tests.test_views frontend.test_views.HomeAlertasTests
+```
+
+```text
+KeyError: 'notificacoes'
+django.urls.exceptions.NoReverseMatch: 'notificacoes' is not a registered namespace
+FileNotFoundError: ...\backend\static\js\notificacoes.js
+Ran 14 tests in 4.824s
+
+FAILED (errors=13)
+```
+
+Os 14 testes foram escritos antes da implementação. O RED apresentou 13 erros, incluindo
+`NoReverseMatch` (`notificacoes` ainda não era namespace registrado), templates ausentes e
+`FileNotFoundError` no `setUpClass` dos testes do JavaScript. O redirecionamento de visitante
+também dependia da rota nova e só passou a ter o status 302 correto no GREEN.
+
+As falhas cobriam: visitante redirecionado com `next`, usuário comum sem `is_staff`,
+renderização com `base.html`, três abas com ARIA, três includes, aba inicial visível, script
+carregado, badge **Alertas** ativo, estados vazios, link do mapa, botão desabilitado sem
+formulário, interação por clique/teclado e ausência de `fetch` ou storage.
+
+### GREEN (arquitetura original)
+
+- app `notificacoes` registrado em `INSTALLED_APPS` e incluído em `setup/urls.py` como
+  `path('notificacoes/', include('notificacoes.urls'))`;
+- `painel_view` com `@login_required(login_url="login")` e `render` simples;
+- `painel.html` e três includes com os estados vazios pedidos;
+- `static/js/notificacoes.js` com clique, setas, Home/End e ARIA — apenas visual;
+- cartão **Alertas** da home transformado em link para `notificacoes:painel`.
+
+```text
+Ran 14 tests in 3.848s
+OK
+```
+
+### REFACTOR
+
+Correção de um detalhe de HTML encontrado na validação: a abertura em `<a>` do cartão **Alertas**
+ainda era fechada com `</button>`. O fechamento foi ajustado para `</a>`; uma linha longa do teste
+do JS foi quebrada para atender ao Ruff. Nenhuma lógica, modelo ou regra foi alterada.
+
+### Verificação final
+
+```text
+python manage.py test                    → Ran 83 tests — OK
+python manage.py check                   → System check identified no issues (0 silenced).
+ruff check .                             → All checks passed!
+pytest                                   → 83 passed, 29 subtests passed in 15.88s
+TOTAL (pytest-cov)                       → 679 statements, 0 miss, 100%
+```
+
+A adição de `usuarios/tests/__init__.py` foi necessária para que o `manage.py test` descobrisse
+os testes da nova localização; isso também passou a incluir os testes unitários de autenticação e
+cadastro que já existiam em `usuarios/tests/`.
+
+### Reorganização para `usuarios`
+
+Pedido posterior: manter a funcionalidade dentro do app existente `usuarios`, sem app
+independente. Não houve novo ciclo RED: foi uma movimentação de arquivos com os mesmos testes,
+adaptados às novas referências.
+
+- view transferida para `usuarios/views.py` como `notificacoes_view`;
+- rota registrada no `frontend/urls.py` já existente:
+  `path("notificacoes/", usuarios_views.notificacoes_view, name="notificacoes")`;
+- templates em `usuarios/templates/usuarios/notificacoes.html` e
+  `usuarios/templates/usuarios/includes/{alertas,favoritos,preferencias}.html`;
+- testes em `usuarios/tests/test_notificacoes.py`;
+- `{% url 'notificacoes' %}` substituiu `{% url 'notificacoes:painel' %}` na home;
+- app `notificacoes` removido, sem registro em `INSTALLED_APPS` ou `setup/urls.py`;
+- `static/js/notificacoes.js` preservado.
+
+```powershell
+.\.venv\Scripts\python.exe manage.py test usuarios.tests.test_notificacoes frontend.test_views.HomeAlertasTests
+python manage.py test
+```
+
+**Pendências de integração:** recebimento real de notificações, favoritar ocorrências no mapa,
+lista de tipos e o salvamento das preferências. Não existe model, migration, API, `fetch`, dado
+fictício ou persistência simulada nesta entrega.
+
+## Login mais limpo
+
+Pedido posterior: retirar o link “Ver mapa de ocorrências” da tela de login. O teste
+`LoginViewTests.test_login_page_has_essential_content` foi alterado primeiro para exigir a ausência
+do texto e do `href="/mapa/"`.
+
+### RED
+
+```powershell
+.\.venv\Scripts\python.exe manage.py test frontend.test_views.LoginViewTests.test_login_page_has_essential_content
+```
+
+```text
+FAIL: test_login_page_has_essential_content
+AssertionError: 1 != 0 : 'Ver mapa de ocorrências' unexpectedly found ...
+Ran 1 test in 0.015s
+
+FAILED (failures=1)
+```
+
+### GREEN
+
+O `<a class="ligacao acesso__visitante">` foi removido de `usuarios/login.html`; as regras CSS
+`.acesso__visitante` (base e media query) e a referência no `DESIGN_SYSTEM.md` também foram
+removidas. O formulário, o alternador Entrar/Criar conta e as mensagens de apoio permanecem.
+
+```text
+Ran 1 test in 0.012s
+OK
+```
+
+Verificação final: `python manage.py test` → **Ran 83 tests — OK**; `python manage.py check` →
+sem problemas; `ruff check .` → `All checks passed!`.
+
+## Conciliação `feature/admin` + `origin/feature/frontend`
+
+Os números acima são históricos de cada branch. Ao integrar o painel administrativo com a
+central de notificações, os conflitos ocorreram apenas em `frontend/test_views.py` e nos três
+documentos. A resolução manteve **as duas classes de teste da home** (Administração e Alertas)
+e **as duas seções de documentação**, renumerando as regras do design system para 16–18 e a
+seção do `FRONTEND.md` para 12. Nenhuma lógica de produção foi alterada na conciliação.
+
+```text
+python manage.py test → Ran 102 tests — OK
+python manage.py check → System check identified no issues (0 silenced).
+ruff check .          → All checks passed!
+```
+
+## Integração final na `feature/admin`: frontend com estatísticas
+
+A integração foi aplicada na branch `feature/admin`, que já contém o painel administrativo e a
+central de notificações. Dela foram trazidas da `feature/frontend` as estatísticas: view, rota,
+template, script e testes. Os conflitos ocorreram em `frontend/test_views.py`,
+`docs/DESIGN_SYSTEM.md`, `docs/FRONTEND.md` e `docs/TDD_EVIDENCE.md` e foram resolvidos
+manualmente: nenhum `--ours`/`--theirs` foi aplicado a arquivo inteiro.
+
+Na resolução da suíte do frontend foram preservados os testes de login, cadastro, home, mapa e
+**estatísticas**, além das contagens originalmente associadas à home. Com Alertas e Estatísticas
+voltando a ser links reais, essas contagens passaram de 2 para 0 no visitante e de 3 para 1 no
+autenticado, e surgiu `test_cartao_estatisticas_aponta_para_rota_real`. Foram incorporadas
+`HomeVinculoAdministracaoTests` e `HomeAlertasTests`, além dos testes do painel e das
+notificações. O link “Ver mapa de ocorrências” foi removido do login e a regra CSS
+`.acesso__visitante` foi limpa. Nenhum modelo, migration, banco ou fluxo de autenticação foi
+alterado.
+
+Correção posterior: `notificacoes.js` e `admin.js` passaram a alternar também as classes visuais
+das abas (`bg-verde-escuro`/`text-white` na ativa, `bg-white`/`text-verde-escuro` nas inativas)
+junto com `aria-selected`; antes, só o estado ARIA mudava e a aba Notificações continuava verde.
+Cada script ganhou um teste que verifica essa troca de classes.
+
+Comandos executados em `backend/` após a resolução (Python 3.11.9, Django 5.2.19,
+pytest 9.2.0):
+
+```powershell
+.\.venv\Scripts\python.exe manage.py test
+.\.venv\Scripts\python.exe manage.py check
+.\.venv\Scripts\python.exe -m pytest -q
+.\.venv\Scripts\python.exe manage.py makemigrations --check --dry-run
+.\.venv\Scripts\ruff.exe check .
+```
+
+```text
+manage.py test                → Ran 115 tests — OK
+manage.py check               → System check identified no issues (0 silenced).
+pytest                        → 115 passed, 75 subtests passed in 22.13s
+pytest-cov                    → 891 statements, 0 miss, 100% (meta: 80%)
+makemigrations --check        → No changes detected
+ruff check .                  → 1 problema pré-existente (E501 no comentário da linha 140 de
+                                frontend/views.py), fora da área administrativa
+```
+
+Os dois runners encontram os mesmos 115 testes porque `usuarios/tests/__init__.py` foi
+preservado nesta branch, permitindo que o runner do Django descubra também os testes unitários de
+`usuarios/`. Os números das seções anteriores não foram reescritos: correspondem ao estado das
+branches na ocasião em que cada comando foi executado.
+
+## Revisão de textos visíveis ao usuário
+
+Todas as páginas e componentes foram revisados: login, cadastro, home (visitante e autenticada),
+mapa, estatísticas, notificações, administração e suas quatro abas, além de `base.html`, logo,
+ilustrações e cartões compartilhados. Não existe página de perfil nem de registro de ocorrências
+neste projeto: o registro aparece apenas como CTA desabilitado na home e os detalhes do mapa têm
+ações desabilitadas.
+
+Foram removidos da interface os avisos “Integração pendente”, “Integrações pendentes”,
+“Interface visual com integrações pendentes” e “Aguardando integração”, além das frases sobre
+backend, prévia da interface, salvamento em etapa futura e futura integração. Os títulos
+explicativos dos controles desabilitados também foram removidos; os controles continuam
+`disabled`. Os status das ocorrências, os textos de erro, sucesso, validação e localização foram
+preservados. As pendências técnicas passaram a constar apenas em `FRONTEND.md` e
+`DESIGN_SYSTEM.md`.
+
+Os testes que verificavam os textos antigos foram atualizados e ganharam asserções de ausência
+dos termos internos; a cobertura permaneceu em 100%.
+
+```text
+manage.py test                → Ran 119 tests — OK
+manage.py check               → System check identified no issues (0 silenced).
+pytest                        → 119 passed, 89 subtests passed in 23.61s
+pytest-cov                    → 923 statements, 0 miss, 100% (meta: 80%)
+makemigrations --check        → No changes detected
+ruff check .                  → 1 problema pré-existente (E501 no comentário da linha 140 de
+                                 frontend/views.py)
+git diff --check              → sem erros
+```

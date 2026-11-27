@@ -642,3 +642,72 @@ class CadastroViewTests(TestCase):
         self.assertEqual(resposta.status_code, 200)
         self.assertContains(resposta, "Este e-mail já está cadastrado.")
         self.assertEqual(User.objects.count(), 1)
+
+class EstatisticasViewTests(TestCase):
+    def test_estatisticas_e_publica_e_usa_template(self) -> None:
+        resposta = self.client.get(reverse("estatisticas"))
+
+        self.assertEqual(resposta.status_code, 200)
+        self.assertTemplateUsed(resposta, "usuarios/estatisticas.html")
+
+    def test_estatisticas_tem_filtros_de_periodo_e_regiao(self) -> None:
+        resposta = self.client.get(reverse("estatisticas"))
+
+        self.assertContains(resposta, 'name="data_inicio"')
+        self.assertContains(resposta, 'name="data_fim"')
+        self.assertContains(resposta, 'name="regiao"')
+
+    def test_sem_ocorrencias_mostra_aviso(self) -> None:
+        resposta = self.client.get(reverse("estatisticas"))
+
+        self.assertContains(resposta, "Nenhuma ocorrência registrada no período.")
+
+    def test_periodo_invertido_mostra_erro(self) -> None:
+        resposta = self.client.get(
+            reverse("estatisticas"),
+            {"data_inicio": "2026-11-30", "data_fim": "2026-11-01"},
+        )
+
+        self.assertContains(resposta, "A data inicial deve ser anterior à final.")
+    
+    def test_estatisticas_entrega_dados_vazios_para_graficos(self) -> None:
+        resposta = self.client.get(reverse("estatisticas"))
+
+        self.assertContains(resposta, 'id="estatisticas-dados"')
+        self.assertEqual(
+            resposta.context["dados"],
+            {"total": 0, "por_tipo": [], "por_data": []},
+        )
+
+    def test_estatisticas_tem_total_e_dois_graficos(self) -> None:
+        resposta = self.client.get(reverse("estatisticas"))
+
+        self.assertContains(resposta, "data-total")
+        self.assertContains(resposta, 'data-grafico="tipo"')
+        self.assertContains(resposta, 'data-grafico="tempo"')
+
+    def test_estatisticas_carrega_chartjs_e_script(self) -> None:
+        resposta = self.client.get(reverse("estatisticas"))
+
+        self.assertContains(resposta, "chart.umd.min.js")
+        self.assertContains(resposta, "js/estatisticas.js")
+
+class EstatisticasJsTests(SimpleTestCase):
+    caminho_js = (
+        Path(__file__).resolve().parents[1] / "static" / "js" / "estatisticas.js"
+    )
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        cls.js = cls.caminho_js.read_text(encoding="utf-8")
+
+    def test_le_dados_do_json_script(self) -> None:
+        self.assertIn('getElementById("estatisticas-dados")', self.js)
+        self.assertIn("JSON.parse", self.js)
+
+    def test_desenha_dois_graficos(self) -> None:
+        self.assertEqual(self.js.count("new Chart("), 2)
+
+    def test_pagina_funciona_sem_chartjs(self) -> None:
+        self.assertIn('typeof Chart === "undefined"', self.js)

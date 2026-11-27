@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Estatísticas — Nossa Rua{% endblock %}
+
+{% block content %}
+<div class="site-shell mx-auto w-full max-w-[90rem] px-[6%] font-base">
+  <header class="flex min-h-[5.5rem] items-center justify-between gap-4 border-b border-borda md:min-h-[4.5rem]">
+    {% include "includes/logo.html" %}
+    <a href="{% url 'inicio' %}" class="home__link inline-flex items-center gap-2">
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M20 12H5m5-5-5 5 5 5" />
+      </svg>
+      Voltar ao início
+    </a>
+  </header>
+
+  <main class="mx-auto w-full max-w-xl py-9 md:py-11">
+    <p class="home__eyebrow mb-6 mt-0 inline-flex items-center gap-2 rounded-full bg-salvia px-3.5 py-1.5 text-[0.6875rem] font-extrabold uppercase tracking-[0.08em] text-verde-escuro">
+      <span class="h-1.5 w-1.5 rounded-full bg-verde"></span>
+      ESTATÍSTICAS
+    </p>
+    <h1 class="m-0 text-[clamp(2rem,3vw,2.5rem)] font-extrabold leading-[1.12] tracking-[-0.04em] text-tinta">
+      Números da <span class="text-verde">sua região.</span>
+    </h1>
+    <p class="mt-4 text-sm leading-[1.8] text-tinta/70">
+      Escolha o período e a região para ver as ocorrências por tipo e ao longo do tempo.
+    </p>
+
+    <form method="get" class="formulario mt-8">
+      <div class="campo">
+        <label class="campo__etiqueta" for="id_data_inicio">Data inicial</label>
+        <div class="campo__grupo">
+          <input type="date" id="id_data_inicio" name="data_inicio" class="campo__controle"
+            value="{{ filtros.data_inicio }}" />
+        </div>
+      </div>
+
+      <div class="campo">
+        <label class="campo__etiqueta" for="id_data_fim">Data final</label>
+        <div class="campo__grupo">
+          <input type="date" id="id_data_fim" name="data_fim" class="campo__controle"
+            value="{{ filtros.data_fim }}" />
+        </div>
+      </div>
+
+      <div class="campo">
+        <label class="campo__etiqueta" for="id_regiao">Região</label>
+        <div class="campo__grupo">
+          <input type="text" id="id_regiao" name="regiao" class="campo__controle"
+            placeholder="Ex.: Asa Norte" value="{{ filtros.regiao }}" />
+        </div>
+      </div>
+
+      {% if erro %}
+        <p class="text-sm text-red-700" role="alert">{{ erro }}</p>
+      {% endif %}
+
+      <button type="submit" class="botao botao--primario">
+        <span>Ver estatísticas</span>
+      </button>
+    </form>
+
+    <section class="mt-10 grid gap-8" aria-live="polite">
+      <p class="m-0 text-sm text-tinta/70">
+        Total de ocorrências: <strong class="text-tinta" data-total>{{ dados.total }}</strong>
+      </p>
+
+      {% if dados.total == 0 %}
+        <p class="m-0 text-sm text-tinta/70">Nenhuma ocorrência registrada no período.</p>
+      {% endif %}
+
+      <figure class="m-0">
+        <figcaption class="campo__etiqueta">Ocorrências por tipo</figcaption>
+        <canvas data-grafico="tipo" role="img" aria-label="Gráfico de ocorrências por tipo"></canvas>
+      </figure>
+
+      <figure class="m-0">
+        <figcaption class="campo__etiqueta">Evolução ao longo do tempo</figcaption>
+        <canvas data-grafico="tempo" role="img" aria-label="Gráfico de ocorrências ao longo do tempo"></canvas>
+      </figure>
+    </section>
+
+    {{ dados|json_script:"estatisticas-dados" }}
+
+  </main>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+  <script src="{% static 'js/estatisticas.js' %}" defer></script>
+{% endblock %}

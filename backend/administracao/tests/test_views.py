@@ -164,21 +164,91 @@ class ConteudoDasAbasTests(TestCase):
         self.assertContains(self.resposta, "disabled")
         self.assertNotContains(self.resposta, "Aguardando integração")
 
-    def test_configuracoes_sao_explicitamente_indisponiveis(self) -> None:
+    def test_configuracoes_traz_apenas_gestao_de_areas(self) -> None:
+        for trecho in (
+            "Áreas atendidas",
+            (
+                "Cadastre áreas, defina limites geográficos e coordenadas GPS "
+                "para os registros."
+            ),
+            "Cadastrar nova área",
+            "Nome da área",
+            "Latitude",
+            "Longitude",
+            "Limites geográficos",
+            "Definir no mapa",
+            "Nenhuma área cadastrada.",
+            "As áreas permitidas aparecerão aqui.",
+            "Nenhuma área é cadastrada ou alterada nesta tela.",
+        ):
+            with self.subTest(trecho=trecho):
+                self.assertContains(self.resposta, trecho)
+
+        inicio = self.html.index('id="painel-configuracoes"')
+        fim = self.html.index('id="painel-ocorrencias"', inicio)
+        painel_configuracoes = self.html[inicio:fim]
         for trecho in (
             "Nome da cidade",
             "Região padrão do mapa",
             "Tipos de ocorrência",
             "Notificações por e-mail",
-            "Nenhuma alteração pode ser feita nesta tela.",
+            "Salvar alterações",
         ):
             with self.subTest(trecho=trecho):
-                self.assertContains(self.resposta, trecho)
-        self.assertNotContains(self.resposta, "integração com o backend")
+                self.assertNotIn(trecho, painel_configuracoes)
         self.assertNotRegex(
             self.html, r'id="painel-configuracoes"[^>]*>\s*<form'
         )
-        self.assertContains(self.resposta, "Salvar alterações")
+        self.assertNotContains(self.resposta, "integração com o backend")
+
+    def test_configuracoes_acoes_de_area_sao_desabilitadas(self) -> None:
+        for acao in (
+            "Cadastrar nova área",
+            "Definir no mapa",
+            "Editar área",
+            "Remover área",
+        ):
+            with self.subTest(acao=acao):
+                padrao = (
+                    r'(?s)<button type="button" disabled aria-disabled="true"'
+                    rf"[^>]*>.*?{acao}.*?</button>"
+                )
+                self.assertRegex(self.html, padrao)
+
+    def test_ocorrencias_traz_gestao_filtros_detalhes_e_tipos(self) -> None:
+        for trecho in (
+            "Gerenciar ocorrências",
+            "Liste, filtre e acompanhe o andamento das ocorrências registradas.",
+            "Buscar ocorrência",
+            "Todos os tipos",
+            "Todos os status",
+            "Ver detalhes",
+            "Tipos de ocorrência",
+            (
+                "Cadastre, edite e desative categorias como buracos, iluminação "
+                "pública e descarte irregular de lixo."
+            ),
+            "Cadastrar tipo",
+            "Nenhum tipo cadastrado.",
+            "Os tipos de ocorrência aparecerão aqui.",
+        ):
+            with self.subTest(trecho=trecho):
+                self.assertContains(self.resposta, trecho)
+
+        for acao in (
+            "Atualizar status",
+            "Ver detalhes",
+            "Cadastrar tipo",
+            "Editar tipo",
+            "Desativar tipo",
+        ):
+            with self.subTest(acao=acao):
+                padrao = (
+                    r'(?s)<button type="button" disabled aria-disabled="true"'
+                    rf"[^>]*>.*?{acao}.*?</button>"
+                )
+                self.assertRegex(self.html, padrao)
+        self.assertNotContains(self.resposta, "integração com o backend")
 
     def test_ocorrencias_usam_status_e_estado_vazio(self) -> None:
         for status in ("Pendente", "Em andamento", "Resolvida"):

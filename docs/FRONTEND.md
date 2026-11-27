@@ -181,9 +181,16 @@ quatro abas internas — não são quatro páginas:
 | Aba | Include | Conteúdo atual |
 |---|---|---|
 | Relatórios | `administracao/includes/relatorios.html` | Indicadores de uso do sistema com valor `—` e legenda `Sem dados`, estado vazio e exportação desabilitada |
-| Configurações | `administracao/includes/configuracoes.html` | Campos desabilitados e aviso de que nenhuma alteração pode ser feita |
-| Ocorrências | `administracao/includes/ocorrencias.html` | Status `Pendente`, `Em andamento` e `Resolvida`, tabela vazia e ação desabilitada |
+| Configurações | `administracao/includes/configuracoes.html` | Somente gestão de áreas atendidas: cadastro, limites geográficos/coordenadas GPS, edição e remoção, com ações desabilitadas |
+| Ocorrências | `administracao/includes/ocorrencias.html` | Gerenciar ocorrências (listagem, filtros, detalhes e atualização de status) e gerenciar tipos de ocorrência, com tabelas vazias e ações desabilitadas |
 | Usuários | `administracao/includes/usuarios.html` | Tabela vazia e aviso de que nenhuma conta é alterada |
+
+A aba de ocorrências tem duas seções: **Gerenciar ocorrências** traz filtros de busca, tipo e
+status, legenda `Pendente`/`Em andamento`/`Resolvida`, tabela com coluna de ações, **Ver detalhes** e
+**Atualizar status**; **Tipos de ocorrência** traz cadastro, edição e desativação de categorias como
+buracos, iluminação pública e descarte irregular de lixo. A aba de configurações ficou apenas com
+**Áreas atendidas**: cadastro de nova área, limites geográficos e coordenadas GPS, edição e remoção.
+Todas usam estados vazios e botões `disabled`; nenhum dado é cadastrado.
 
 A view é deliberadamente mínima: `@login_required(login_url="login")` encaminha o visitante ao
 login existente com `?next=/administracao/`; em seguida, `is_staff` provisório devolve um simples

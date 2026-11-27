@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Registrar ocorrência — Nossa Rua{% endblock %}
+
+{% block content %}
+<div class="site-shell mx-auto w-full max-w-[90rem] px-[6%] font-base">
+  <header class="flex min-h-[5.5rem] items-center justify-between gap-4 border-b border-borda md:min-h-[4.5rem]">
+    {% include "includes/logo.html" %}
+    <a href="{% url 'inicio' %}" class="home__link inline-flex items-center gap-2">
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M20 12H5m5-5-5 5 5 5" />
+      </svg>
+      Voltar ao início
+    </a>
+  </header>
+
+  <main class="mx-auto w-full max-w-xl py-9 md:py-11">
+    <p class="home__eyebrow mb-6 mt-0 inline-flex items-center gap-2 rounded-full bg-salvia px-3.5 py-1.5 text-[0.6875rem] font-extrabold uppercase tracking-[0.08em] text-verde-escuro">
+      <span class="h-1.5 w-1.5 rounded-full bg-verde"></span>
+      NOVA OCORRÊNCIA
+    </p>
+    <h1 class="m-0 text-[clamp(2rem,3vw,2.5rem)] font-extrabold leading-[1.12] tracking-[-0.04em] text-tinta">
+      Registrar <span class="text-verde">ocorrência.</span>
+    </h1>
+    <p class="mt-4 text-sm leading-[1.8] text-tinta/70">
+      Conte o que você viu. A data, a hora e o local são registrados junto.
+    </p>
+
+    {% if messages %}
+      {% for mensagem in messages %}
+        <p class="mt-4 rounded-xl bg-salvia px-4 py-3 text-sm text-verde-escuro" role="status">
+          {{ mensagem }}
+        </p>
+      {% endfor %}
+    {% endif %}
+
+    {% if formulario.non_field_errors %}
+      <div class="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
+        {{ formulario.non_field_errors }}
+      </div>
+    {% endif %}
+
+    <form method="post" class="formulario mt-8">
+      {% csrf_token %}
+
+      <div class="campo">
+        <label class="campo__etiqueta" for="id_tipo">Tipo de ocorrência</label>
+        <div class="campo__grupo">
+          <svg class="campo__icone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 6h16M4 12h16M4 18h10" />
+          </svg>
+          <select id="id_tipo" name="tipo" required class="campo__controle">
+            <option value="" disabled {% if not formulario.tipo.value %}selected{% endif %}>Escolha o tipo</option>
+            {% for valor, rotulo in tipos %}
+              <option value="{{ valor }}" {% if formulario.tipo.value == valor %}selected{% endif %}>{{ rotulo }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        {% for erro in formulario.tipo.errors %}
+          <p class="mt-1 text-xs text-red-700" role="alert">{{ erro }}</p>
+        {% endfor %}
+      </div>
+
+      <div class="campo">
+        <label class="campo__etiqueta" for="id_descricao">Detalhes</label>
+        <div class="campo__grupo items-start py-1">
+          <textarea id="id_descricao" name="descricao" rows="4" class="campo__controle resize-y"
+            placeholder="Ex.: buraco grande na calçada em frente ao número 120.">{{ formulario.descricao.value|default_if_none:"" }}</textarea>
+        </div>
+        {% for erro in formulario.descricao.errors %}
+          <p class="mt-1 text-xs text-red-700" role="alert">{{ erro }}</p>
+        {% endfor %}
+      </div>
+
+      <div class="campo">
+        <span class="campo__etiqueta">Localização</span>
+        <button type="button" class="botao botao--secundario" data-localizacao>
+          <span>Usar minha localização</span>
+        </button>
+        <p class="mt-2 text-xs text-tinta/70" data-localizacao-status aria-live="polite">
+          Localização ainda não capturada.
+        </p>
+        <input type="hidden" name="latitude" id="latitude" value="{{ formulario.latitude.value|default_if_none:'' }}" />
+        <input type="hidden" name="longitude" id="longitude" value="{{ formulario.longitude.value|default_if_none:'' }}" />
+        {% for erro in formulario.latitude.errors %}
+          <p class="mt-1 text-xs text-red-700" role="alert">Latitude: {{ erro }}</p>
+        {% endfor %}
+        {% for erro in formulario.longitude.errors %}
+          <p class="mt-1 text-xs text-red-700" role="alert">Longitude: {{ erro }}</p>
+        {% endfor %}
+      </div>
+
+      <button type="submit" class="botao botao--primario">
+        <span>Registrar ocorrência</span>
+        <svg class="botao__seta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M5 12h13" />
+          <path d="m13 6 6 6-6 6" />
+        </svg>
+      </button>
+    </form>
+  </main>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+  <script src="{% static 'js/registrar_ocorrencia.js' %}" defer></script>
+{% endblock %}

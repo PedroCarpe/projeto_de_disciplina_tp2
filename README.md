@@ -17,7 +17,6 @@ O projeto adota uma arquitetura monolítica organizada sob o diretório `backend
 ```text
 .
 ├── backend
-│   ├── db.sqlite3
 │   ├── manage.py
 │   ├── pyproject.toml
 │   ├── requirements.txt
@@ -78,22 +77,26 @@ No Windows, como o ambiente de desenvolvimento da equipe é misto, siga os passo
 
 ## 🗄️ Configuração do Banco de Dados (PostGIS)
 
-No seu servidor PostgreSQL, crie um banco de dados dedicado ao projeto e ative a extensão espacial PostGIS:
+O Django usa o backend GeoDjango para PostGIS. É possível iniciar um banco local com Docker Compose (Docker Engine e Compose v2 precisam estar instalados):
 
-```sql
-CREATE DATABASE sistema_ocorrencias;
-\c sistema_ocorrencias;
-CREATE EXTENSION postgis;
+```bash
+docker compose up -d db
 ```
+
+O serviço utiliza `sistema_ocorrencias`, usuário `postgres`, senha `postgres` e porta `5432` por padrão. Para mudar esses valores, defina `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD` e/ou `POSTGRES_PORT` no ambiente antes de iniciar o Compose. O Django usa as mesmas variáveis e conecta a `localhost` por padrão; em ambientes diferentes, também defina `POSTGRES_HOST` e `POSTGRES_PORT` para a conexão do Django.
+
+O volume `postgres_data` mantém os dados entre reinicializações. Para conectar a um servidor PostgreSQL/PostGIS já existente, configure as mesmas variáveis no ambiente da aplicação. A extensão PostGIS precisa estar disponível no servidor; a imagem do Compose ativa essa extensão automaticamente ao criar o banco.
 
 ## 🚀 Executando o Projeto
 
-Com o ambiente virtual ativado e as dependências instaladas na pasta `backend/`, aplique as migrações e inicie o servidor:
+Com o banco iniciado, o ambiente virtual ativado e as dependências instaladas na pasta `backend/`, aplique as migrações e inicie o servidor:
 
 ```bash
 python manage.py migrate
 python manage.py runserver
 ```
+
+Os registros que estavam no `backend/db.sqlite3` não são copiados automaticamente. Se precisar preservá-los, exporte os dados do SQLite antes da troca e importe-os depois de aplicar as migrações no Postgres.
 
 Acesse no navegador: `http://127.0.0.1:8000/`
 

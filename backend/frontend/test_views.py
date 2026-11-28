@@ -148,10 +148,11 @@ class HomeAutenticadoTests(TestCase):
         self.assertNotIn("home_mapa.js", conteudo)
         self.assertNotIn("home-mapa-canvas", conteudo)
 
-    def test_botoes_indisponiveis_do_autenticado_sao_explicitos(self) -> None:
+    def test_cta_registrar_leva_para_tela_de_registro(self) -> None:
         conteudo = self.client.get(reverse("inicio")).content.decode()
 
-        self.assertEqual(conteudo.count('disabled aria-disabled="true"'), 1)
+        self.assertIn(f'href="{reverse("registrar_ocorrencia")}"', conteudo)
+        self.assertNotIn('disabled aria-disabled="true"', conteudo)
 
     def test_cta_indisponivel_nao_cita_integracao(self) -> None:
         conteudo = self.client.get(reverse("inicio")).content.decode()

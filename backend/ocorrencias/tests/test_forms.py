@@ -1,5 +1,5 @@
-from django.test import SimpleTestCase, TestCase
 from django.contrib.auth.models import User
+from django.test import SimpleTestCase, TestCase
 
 from ocorrencias.forms import OcorrenciaForm
 from ocorrencias.models import Ocorrencia

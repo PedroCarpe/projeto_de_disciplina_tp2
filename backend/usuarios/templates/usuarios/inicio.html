@@ -56,16 +56,15 @@
           <p class="home__descricao mt-6 max-w-md text-sm leading-[1.85] text-[#67756c]">
             Registre, acompanhe e contribua para melhorar sua região.
           </p>
-          <button
-            type="button"
+          <a
+            href="{% url 'registrar_ocorrencia' %}"
             class="botao botao--primario home__cta mt-7 w-auto gap-3 rounded-[0.625rem] px-5 py-3 text-xs font-bold shadow-[0_4px_8px_rgba(31,82,64,0.10)] transition hover:-translate-y-0.5"
-            disabled aria-disabled="true"
           >
             Registrar ocorrência
             <svg class="botao__seta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M4 12h15m-5-5 5 5-5 5" />
             </svg>
-          </button>
+          </a>
         {% else %}
           <h1 id="home-titulo" class="home__titulo mt-0 max-w-[36ch] text-[clamp(2.25rem,4.25vw,3.75rem)] font-extrabold leading-[1.16] tracking-[-0.07em] text-tinta">
             Uma cidade melhor<br class="hidden md:block" /> começa <span class="text-verde">por aqui.</span>

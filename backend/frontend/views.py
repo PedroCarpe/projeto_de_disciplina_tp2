@@ -137,7 +137,7 @@ def estatisticas_view(request: HttpRequest) -> HttpResponse:
     # Datas no formato AAAA-MM-DD (input type="date") comparam certo como texto.
     if data_inicio and data_fim and data_inicio > data_fim:
         erro = "A data inicial deve ser anterior à final."
-    # shortcut: dados vazios até existir o app ocorrencias; trocar pela consulta filtrada.
+    # shortcut: dados vazios até ligar ao app ocorrencias; trocar pela consulta.
     dados = {"total": 0, "por_tipo": [], "por_data": []}
     return render(
         request,

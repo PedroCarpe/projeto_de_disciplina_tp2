@@ -10,8 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
-from pathlib import Path
 import os
+from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,7 +26,8 @@ SECRET_KEY = 'django-insecure-@ql239tj31(7kc8*_w&*#ltiz2%c2aw5)vm6*w#0aha=#upj7$
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".trycloudflare.com"]
+CSRF_TRUSTED_ORIGINS = ["https://*.trycloudflare.com"]
 
 
 # Application definition
